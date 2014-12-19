@@ -32,13 +32,12 @@ app.get('/api/users', function(req, res) {
       if ((users[i].id===req.query.username) && (users[i].password===req.query.password)) {
         console.log("printing users object");
         console.log([users[i]]);
-        res.send({users: [users[i]]});
-        res.end();
+        return res.send({users: [users[i]]});
       }
     }
-    res.send({users: []});
+    return res.send({users: []});
   } else {
-    res.send({users: users});
+    return res.send({users: users});
   }
   res.status(404);
   res.end();
