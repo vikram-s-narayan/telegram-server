@@ -1,14 +1,10 @@
 var express = require('express');
+var bodyParser = require('body-parser');
+
 var app = express();
-// Route implementation
-//go to http://192.168.56.10:3000/hello.txt to see this
-/*app.get('/hello.txt', function(req, res) {
-  res.send('Hello World');
-});*/
-/*
-app.get('/api/', function(req, res) {// need to check ... if I cut this out, will login not work?
-  res.send({user: user});
-});*/
+
+var jsonParser = bodyParser.json();
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 app.get('/api/users/:userid', function(req, res) {
   var id = req.params.userid;
@@ -42,6 +38,24 @@ app.get('/api/users', function(req, res) {
   res.status(404);
   res.end();
 });
+
+app.post('/api/users', jsonParser, function (req, res) {
+  if (!req.body) return res.sendStatus(400)
+    // create user in req.body
+    //var id = req.body.id;
+    //var name = req.body.username;
+    //var password = req.body.password;
+    var newUser = {
+      id: req.body.id,
+      name: req.body.name,
+      email: null, //because currently not handled in the ember signup route
+      password: req.body.password,
+      posts: []
+    };
+    users.push(newUser);
+    console.log(newUser);
+    return res.send({users: [newUser]});
+  });
 
 var server = app.listen(3000, function() {
     console.log('Listening on port %d', server.address().port);
@@ -128,3 +142,9 @@ var posts = [
   //should take form {users: [this_user]}
   //else send all the users to the client
   //required by followers and following in users
+
+  // Route implementation
+  //go to http://192.168.56.10:3000/hello.txt to see this
+  /*app.get('/hello.txt', function(req, res) {
+  res.send('Hello World');
+});*/
