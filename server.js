@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var app = express();
 
 var jsonParser = bodyParser.json();
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
+//var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 app.get('/api/users/:userid', function(req, res) {
   var id = req.params.userid;
@@ -41,20 +41,10 @@ app.get('/api/users', function(req, res) {
 
 app.post('/api/users', jsonParser, function (req, res) {
   if (!req.body) return res.sendStatus(400)
-    // create user in req.body
-    //var id = req.body.id;
-    //var name = req.body.username;
-    //var password = req.body.password;
-    var newUser = {
-      id: req.body.id,
-      name: req.body.name,
-      email: null, //because currently not handled in the ember signup route
-      password: req.body.password,
-      posts: []
-    };
+    newUser = req.body.user;
     users.push(newUser);
     console.log(newUser);
-    return res.send({users: [newUser]});
+    return res.send({user: newUser});
   });
 
 var server = app.listen(3000, function() {
@@ -132,17 +122,6 @@ var posts = [
     createdAt: new Date("October 15, 2014 12:30:00")
   }
   ];
-  //res.send({users: users});//this worked;
-  //res.status(200).end();
-  //if req.query.operation==='login' then find the user whose id matches
-  //request.query.username
-  //then check if password matches
-  //then send back the user object to the client
-  //ember is expecting an array so
-  //should take form {users: [this_user]}
-  //else send all the users to the client
-  //required by followers and following in users
-
   // Route implementation
   //go to http://192.168.56.10:3000/hello.txt to see this
   /*app.get('/hello.txt', function(req, res) {
