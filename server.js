@@ -1,37 +1,92 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var logger = require('nlogger').logger(module); //module here is an object that contains info about this server.js file
+var cookieParser = require('cookie-parser');
+
+var session = require('express-session')
+
+var passport = require('passport')
+var LocalStrategy = require('passport-local').Strategy;
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    console.log("local strategy called");
+    User.findOne({ username: username }, function(err, user) {
+      if (err) { return done(err); }
+        if (!user) {
+          return done(null, false, { message: 'Incorrect username.' });
+        }
+        if (!user.validPassword(password)) {
+          return done(null, false, { message: 'Incorrect password.' });
+        }
+        return done(null, user);
+      });
+    }
+  ));
+
+//do I need to create a findOne function like so?
+function findOne(username, fn) {
+  for (var i = 0, len = users.length; i < len; i++) {
+    var user = users[i];
+    if (user.username === username) {
+      return fn(null, user);
+    }
+  }
+  return fn(null, null);
+}
+
+
 
 var app = express();
 
-var jsonParser = bodyParser.json();
-//var urlencodedParser = bodyParser.urlencoded({ extended: false });
+app.use(cookieParser());//installed separately as it's been removed from Express
+app.use(bodyParser.json());
+app.use(session({ secret: 'apples and oranges', resave: false,saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+  passport.serializeUser(function(user, done) {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser(function(id, done) {
+    User.findById(id, function(err, user) {
+      done(err, user);
+    });
+  });
 
 app.get('/api/users/:userid', function(req, res) {
   var id = req.params.userid;
   for (i=0; i<users.length; i++) {
     if (users[i].id===id) {
+      logger.info("user sent");
+
       return res.send({user: users[i]}) //default set to 200 status
     }
   }
+  logger.error("user does not exist");
   res.status(404);
   res.end();
 });
-
 
 app.get('/api/posts', function(req, res) {
   res.send({posts: posts}) //key can either be with or without quotes
 })
 
-app.get('/api/users', function(req, res) {
+app.get('/api/users', function(req, res, next) {
   if (req.query.operation==="login") {
-    for (var i=0; i<users.length; i++) {
-      if ((users[i].id===req.query.username) && (users[i].password===req.query.password)) {
-        console.log("printing users object");
-        console.log([users[i]]);
-        return res.send({users: [users[i]]});
-      }
-    }
-    return res.send({users: []});
+    passport.authenticate('local', function(err, user, info){
+      console.log("passport.authenticate called");
+      if (err) { res.sendStatus(500); }
+      if (!user) { return res.sendStatus(404); }
+      req.login(user, function(err) {
+        if (err) { return res.sendStatus(500); }
+        logger.info("now returning user info after auth");
+        return res.send({users: [user]});
+      });
+    })(req, res, next);
+
   } else {
     return res.send({users: users});
   }
@@ -39,7 +94,7 @@ app.get('/api/users', function(req, res) {
   res.end();
 });
 
-app.post('/api/users', jsonParser, function (req, res) {
+app.post('/api/users', function (req, res) {
   if (!req.body) return res.sendStatus(400)
     newUser = req.body.user;
     users.push(newUser);
