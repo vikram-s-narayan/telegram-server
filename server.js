@@ -8,33 +8,45 @@ var session = require('express-session')
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
 
-passport.use(new LocalStrategy(
+passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
   function(username, password, done) {
     console.log("local strategy called");
-    User.findOne({ username: username }, function(err, user) {
-      if (err) { return done(err); }
+    findOne(username, function(err, user) { //matches "fn" in the function findOne
+      if (err) { return done(err); } //done function refers to the second argument
+        //of password.authenticate => function(err, user, info)
         if (!user) {
+          console.log("incorrect username " + username);
           return done(null, false, { message: 'Incorrect username.' });
         }
-        if (!user.validPassword(password)) {
+        if (!validPassword(user, password)) {
+          console.log("incorrect password " + password);
           return done(null, false, { message: 'Incorrect password.' });
         }
-        return done(null, user);
+        return done(null, user); // if everything goes okay ... username and password ok;
       });
     }
   ));
 
-//do I need to create a findOne function like so?
-function findOne(username, fn) {
+
+function findOne(username, fn) { //fn argument refers to the callback of the function;
+  //Once username found, you call fn; this is an async function;
+  //take username and send me the results via the fn function
   for (var i = 0, len = users.length; i < len; i++) {
     var user = users[i];
-    if (user.username === username) {
+    if (username === user.id) {
       return fn(null, user);
     }
   }
-  return fn(null, null);
+  return fn(null, null); // if user not found in system;
 }
 
+function validPassword(user, password){
+  if (user.password === password) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 
 var app = express();
@@ -42,16 +54,16 @@ var app = express();
 app.use(cookieParser());//installed separately as it's been removed from Express
 app.use(bodyParser.json());
 app.use(session({ secret: 'apples and oranges', resave: false,saveUninitialized: true }));
-app.use(passport.initialize());
+app.use(passport.initialize()); //this middleware (function with 3 arguments) ... and part of passport;
 app.use(passport.session());
 
 
-  passport.serializeUser(function(user, done) {
+  passport.serializeUser(function(user, done) { //passport calls this behind the scenes;
     done(null, user.id);
   });
 
   passport.deserializeUser(function(id, done) {
-    User.findById(id, function(err, user) {
+    findOne(id, function(err, user) {
       done(err, user);
     });
   });
@@ -76,11 +88,12 @@ app.get('/api/posts', function(req, res) {
 
 app.get('/api/users', function(req, res, next) {
   if (req.query.operation==="login") {
-    passport.authenticate('local', function(err, user, info){
+    passport.authenticate('local', function(err, user, info){ //err, user and info
+      //are the arguments of the "done" function from local strategy;
       console.log("passport.authenticate called");
       if (err) { res.sendStatus(500); }
       if (!user) { return res.sendStatus(404); }
-      req.login(user, function(err) {
+      req.login(user, function(err) { //passport created req.login in the initialize middleware
         if (err) { return res.sendStatus(500); }
         logger.info("now returning user info after auth");
         return res.send({users: [user]});
@@ -101,6 +114,15 @@ app.post('/api/users', function (req, res) {
     console.log(newUser);
     return res.send({user: newUser});
   });
+
+app.post('/api/posts', function (req, res){
+  var newPost = req.body.post;
+  console.log(req.user);
+  var postId = posts.length+1;
+  newPost.id = postId;
+  posts.push(newPost);
+  return res.send({post: newPost});
+})
 
 var server = app.listen(3000, function() {
     console.log('Listening on port %d', server.address().port);
