@@ -1,15 +1,15 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+var express = require('express'); //framework for node
+var bodyParser = require('body-parser'); //takes content of new posts and new users created (form input) and makes into json objects
 var logger = require('nlogger').logger(module); //module here is an object that contains info about this server.js file
-var cookieParser = require('cookie-parser');
+var cookieParser = require('cookie-parser');//takes cookies and makes into json objects
 
-var session = require('express-session')
+var session = require('express-session') //creates and reads cookies to maintain sessions
 
-var passport = require('passport')
-var LocalStrategy = require('passport-local').Strategy;
+var passport = require('passport')//handles authentication and authorization
+var LocalStrategy = require('passport-local').Strategy; //type of authentication where we authenticate off local store
 
 passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
-  function(username, password, done) {
+  function(username, password, done) { //done is a callback function
     console.log("local strategy called");
     findOne(username, function(err, user) { //matches "fn" in the function findOne
       if (err) { return done(err); } //done function refers to the second argument
@@ -92,7 +92,8 @@ app.get('/api/users', function(req, res, next) {
       //are the arguments of the "done" function from local strategy;
       console.log("passport.authenticate called");
       if (err) { res.sendStatus(500); }
-      if (!user) { return res.sendStatus(404); }
+      //if (!user) { return res.sendStatus(404); }
+      if (!user) { return res.status(403).send(info.message); } //If we don't have any user we're sending the string message stored in the info variable.
       req.login(user, function(err) { //passport created req.login in the initialize middleware
         if (err) { return res.sendStatus(500); }
         logger.info("now returning user info after auth");
@@ -117,12 +118,18 @@ app.post('/api/users', function (req, res) {
 
 app.post('/api/posts', function (req, res){
   var newPost = req.body.post;
-  console.log(req.user);
-  var postId = posts.length+1;
-  newPost.id = postId;
-  posts.push(newPost);
-  return res.send({post: newPost});
-})
+  console.log("This is req.isAuthenticated: " + req.isAuthenticated());
+  if (req.isAuthenticated() && req.user.id===newPost.postCreator) {
+    var postId = posts.length+1;
+    newPost.id = postId;
+    posts.push(newPost);
+    return res.send({post: newPost});
+  } else {
+      console.log("cannot make this post");
+      return res.status(403);
+      res.end();
+    }
+});
 
 var server = app.listen(3000, function() {
     console.log('Listening on port %d', server.address().port);
