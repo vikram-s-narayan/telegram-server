@@ -53,7 +53,7 @@ var app = express();
 
 app.use(cookieParser());//installed separately as it's been removed from Express
 app.use(bodyParser.json());
-app.use(session({ secret: 'apples and oranges', resave: false,saveUninitialized: true }));
+app.use(session({ secret: 'apples and oranges', resave: false, saveUninitialized: true }));
 app.use(passport.initialize()); //this middleware (function with 3 arguments) ... and part of passport;
 app.use(passport.session());
 
@@ -73,7 +73,6 @@ app.get('/api/users/:userid', function(req, res) {
   for (i=0; i<users.length; i++) {
     if (users[i].id===id) {
       logger.info("user sent");
-
       return res.send({user: users[i]}) //default set to 200 status
     }
   }
@@ -116,10 +115,21 @@ app.post('/api/users', function (req, res) {
     return res.send({user: newUser});
   });
 
-app.post('/api/posts', function (req, res){
+function ensureAuthenticated(req, res, next) {
+  console.log("middleware ensureAuthenticated called")
+  if (req.isAuthenticated()) {
+    console.log("user is allowed to do this action")
+    return next();
+  } else {
+    console.log("forbidden action");
+    res.status(403).jsonp( {error: 'Forbidden action!'} );
+  }
+}
+
+app.post('/api/posts', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
-  console.log("This is req.isAuthenticated: " + req.isAuthenticated());
-  if (req.isAuthenticated() && req.user.id===newPost.postCreator) {
+  //console.log("isAuthenticated via ensureAuthenticated: " + req.isAuthenticated());
+  if (req.user.id===newPost.postCreator) {
     var postId = posts.length+1;
     newPost.id = postId;
     posts.push(newPost);
