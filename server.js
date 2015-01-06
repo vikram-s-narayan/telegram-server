@@ -58,15 +58,15 @@ app.use(passport.initialize()); //this middleware (function with 3 arguments) ..
 app.use(passport.session());
 
 
-  passport.serializeUser(function(user, done) { //passport calls this behind the scenes;
-    done(null, user.id);
-  });
+passport.serializeUser(function(user, done) { //passport calls this behind the scenes;
+  done(null, user.id);
+});
 
-  passport.deserializeUser(function(id, done) {
-    findOne(id, function(err, user) {
-      done(err, user);
-    });
+passport.deserializeUser(function(id, done) {
+  findOne(id, function(err, user) {
+    done(err, user);
   });
+});
 
 app.get('/api/users/:userid', function(req, res) {
   var id = req.params.userid;
@@ -92,7 +92,7 @@ app.get('/api/users', function(req, res, next) {
       console.log("passport.authenticate called");
       if (err) { res.sendStatus(500); }
       //if (!user) { return res.sendStatus(404); }
-      if (!user) { return res.status(403).send(info.message); } //If we don't have any user we're sending the string message stored in the info variable.
+      if (!user) { return res.status(403).send(info.message); } //If we don't have any user send the string message stored in the info variable.
       req.login(user, function(err) { //passport created req.login in the initialize middleware
         if (err) { return res.sendStatus(500); }
         logger.info("now returning user info after auth");
