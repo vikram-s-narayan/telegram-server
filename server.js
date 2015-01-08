@@ -101,7 +101,11 @@ app.get('/api/users', function(req, res, next) {
     })(req, res, next);
 
   } else {
-    return res.send({users: users});
+      if (req.isAuthenticated) {
+      return res.send({users: users});
+    } else {
+      return res.send({});
+    }
   }
   res.status(404);
   res.end();
@@ -139,6 +143,11 @@ app.post('/api/posts', ensureAuthenticated, function (req, res){
       return res.status(403);
       res.end();
     }
+});
+
+app.post('/api/logout', function(req, res) {
+  req.logOut();
+  res.sendStatus(200);
 });
 
 var server = app.listen(3000, function() {
