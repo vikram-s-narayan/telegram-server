@@ -99,12 +99,12 @@ app.get('/api/users', function(req, res, next) {
         return res.send({users: [user]});
       });
     })(req, res, next);
-
-  } else {
-      if (req.isAuthenticated) {
-      return res.send({users: users});
+  } else if (req.query.isAuthenticated === 'true') {//why do we need an else if here since the next "if" is nested?
+    // This means that the client is asking the server if the user who made this request is authenticated or not.
+      if (req.isAuthenticated()) {
+      return res.send({users: [req.user]});
     } else {
-      return res.send({});
+      return res.send({users: []});
     }
   }
   res.status(404);
