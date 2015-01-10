@@ -70,15 +70,19 @@ passport.deserializeUser(function(id, done) {
 
 app.get('/api/users/:userid', function(req, res) {
   var id = req.params.userid;
-  for (i=0; i<users.length; i++) {
-    if (users[i].id===id) {
-      logger.info("user sent");
-      return res.send({user: users[i]}) //default set to 200 status
+  findOne(id, function(err, user){
+    if (err) {
+      return res.sendStatus(500);
     }
-  }
-  logger.error("user does not exist");
-  res.status(404);
-  res.end();
+
+    if (!user){
+      return res.sendStatus(404);
+    }
+
+    return res.send({user: user});
+
+  });
+
 });
 
 app.get('/api/posts', function(req, res) {
@@ -99,15 +103,19 @@ app.get('/api/users', function(req, res, next) {
         return res.send({users: [user]});
       });
     })(req, res, next);
-  } else if (req.query.isAuthenticated === 'true') {//why do we need an else if here since the next "if" is nested?
+  } else if (req.query.operation === 'isAuthenticated') {//why do we need an else if here since the next "if" is nested?
     // This means that the client is asking the server if the user who made this request is authenticated or not.
       if (req.isAuthenticated()) {
       return res.send({users: [req.user]});
     } else {
       return res.send({users: []});
     }
+  } else if (req.query.operation === 'getFollowers') {
+    return res.send({users: users});
+  } else if (req.query.operation === 'getFollowing') {
+    return res.send({users: users});
   }
-  res.status(404);
+  res.status(404);//why is this not wrapped in an "else" branch?
   res.end();
 });
 
@@ -127,6 +135,7 @@ function ensureAuthenticated(req, res, next) {
   } else {
     console.log("forbidden action");
     res.status(403).jsonp( {error: 'Forbidden action!'} );
+    //res.sendStatus(403);<=this is a better way to do it ... unless you need customization;
   }
 }
 
@@ -137,6 +146,7 @@ app.post('/api/posts', ensureAuthenticated, function (req, res){
     var postId = posts.length+1;
     newPost.id = postId;
     posts.push(newPost);
+
     return res.send({post: newPost});
   } else {
       console.log("cannot make this post");
@@ -147,7 +157,7 @@ app.post('/api/posts', ensureAuthenticated, function (req, res){
 
 app.post('/api/logout', function(req, res) {
   req.logOut();
-  res.sendStatus(200);
+  res.sendStatus(200);//where is this success message being used? You can test with 403;
 });
 
 var server = app.listen(3000, function() {
