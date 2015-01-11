@@ -8,6 +8,39 @@ var session = require('express-session') //creates and reads cookies to maintain
 var passport = require('passport')//handles authentication and authorization
 var LocalStrategy = require('passport-local').Strategy; //type of authentication where we authenticate off local store
 
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/telegram');
+var Schema = mongoose.Schema;
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+
+db.once('open', function (callback) {
+  console.log("db connected");
+  var userSchema = new Schema({
+    id: String,
+    name: String,
+    email: String,
+    password: String,
+    posts: [{id: Number}]
+  });
+
+  var User = mongoose.model('User', userSchema);
+
+  var asterix = new User({
+    id: "asterix",
+    name: "Asterix the Gaul",
+    email: "asterix@gaul.com",
+    password: "gaul",
+  });
+
+  asterix.save(function(err, asterix) {
+    if (err) return console.error(err);
+    console.dir(asterix);
+  });
+});
+
+
 passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
   function(username, password, done) { //done is a callback function
     console.log("local strategy called");
@@ -163,6 +196,7 @@ app.post('/api/logout', function(req, res) {
 var server = app.listen(3000, function() {
     console.log('Listening on port %d', server.address().port);
 });
+
 
 var users = [
   {
