@@ -17,27 +17,28 @@ db.on('error', console.error.bind(console, 'connection error:'));
 
 db.once('open', function (callback) {
   console.log("db connected");
-  var userSchema = new Schema({
-    id: String,
-    name: String,
-    email: String,
-    password: String,
-    posts: [{id: Number}]
-  });
+});
 
-  var User = mongoose.model('User', userSchema);
+var userSchema = new Schema({
+  id: String,
+  name: String,
+  email: String,
+  password: String,
+  posts: [{id: Number}]
+});
 
-  var asterix = new User({
-    id: "asterix",
-    name: "Asterix the Gaul",
-    email: "asterix@gaul.com",
-    password: "gaul",
-  });
+var User = mongoose.model('User', userSchema);
 
-  asterix.save(function(err, asterix) {
-    if (err) return console.error(err);
-    console.dir(asterix);
-  });
+var asterix = new User({
+  id: "asterix",
+  name: "Asterix the Gaul",
+  email: "asterix@gaul.com",
+  password: "gaul",
+});
+
+asterix.save(function(err, asterix) {
+  if (err) return console.error(err);
+  console.dir(asterix);
 });
 
 
