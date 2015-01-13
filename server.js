@@ -28,19 +28,42 @@ var userSchema = new Schema({
 });
 
 var User = mongoose.model('User', userSchema);
-
-var asterix = new User({
-  id: "asterix",
-  name: "Asterix the Gaul",
-  email: "asterix@gaul.com",
+/*
+var userToDb = new User({
+  id: "obelix",
+  name: "Obelix the Gaul",
+  email: "obelix@gaul.com",
   password: "gaul",
 });
 
-asterix.save(function(err, asterix) {
+userToDb.save(function(err, userToDb) {
   if (err) return console.error(err);
-  console.dir(asterix);
+  console.dir(userToDb);
 });
 
+User.findOne({ 'id': 'obelix' }, 'name email', function (err, user) {
+  if (err) return handleError(err);
+  console.log('%s has email: %s.', user.name, user.email);
+  });
+*/
+
+
+function findOne(username, fn) { //fn argument refers to the callback of the function;
+  //Once username found, you call fn; this is an async function;
+  //take username and send me the results via the fn function
+  var userReturned = {};
+  User.findOne({'id': username}, 'id name email password posts',
+    function (err, user) {
+      if (err) return handleError(err);
+        userReturned.id = user.id;
+        userReturned.name = user.name;
+        userReturned.email = user.email;
+        userReturned.password = user.password;
+        userReturned.posts = user.posts;
+    });
+    return fn(null, userReturned);
+    return fn(null, null); // if user not found in system;
+}
 
 passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
   function(username, password, done) { //done is a callback function
@@ -62,17 +85,6 @@ passport.use(new LocalStrategy( //instantiating a class of local strategy / obje
   ));
 
 
-function findOne(username, fn) { //fn argument refers to the callback of the function;
-  //Once username found, you call fn; this is an async function;
-  //take username and send me the results via the fn function
-  for (var i = 0, len = users.length; i < len; i++) {
-    var user = users[i];
-    if (username === user.id) {
-      return fn(null, user);
-    }
-  }
-  return fn(null, null); // if user not found in system;
-}
 
 function validPassword(user, password){
   if (user.password === password) {
@@ -149,15 +161,25 @@ app.get('/api/users', function(req, res, next) {
   } else if (req.query.operation === 'getFollowing') {
     return res.send({users: users});
   }
-  res.status(404);//why is this not wrapped in an "else" branch?
+  res.status(404);
   res.end();
 });
 
 app.post('/api/users', function (req, res) {
-  if (!req.body) return res.sendStatus(400)
+  if (!req.body) return res.sendStatus(400);
     newUser = req.body.user;
-    users.push(newUser);
-    console.log(newUser);
+    //users.push(newUser);
+    //console.log(newUser);
+    var userToDb = new User({
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.password
+    });
+
+    userToDb.save(function(err, userToDb){
+      if(err) return console.error(err);
+      console.dir(userToDb);
+    })
     return res.send({user: newUser});
   });
 
