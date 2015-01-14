@@ -48,22 +48,26 @@ User.findOne({ 'id': 'obelix' }, 'name email', function (err, user) {
 */
 
 
-function findOne(username, fn) { //fn argument refers to the callback of the function;
+//function findOne(username, fn) { //fn argument refers to the callback of the function;
   //Once username found, you call fn; this is an async function;
   //take username and send me the results via the fn function
-  var userReturned = {};
-  User.findOne({'id': username}, 'id name email password posts',
-    function (err, user) {
+  //var userReturned = {};
+  //User.findOne({'id': username},function (err, user) {
+      /*
       if (err) return handleError(err);
         userReturned.id = user.id;
         userReturned.name = user.name;
         userReturned.email = user.email;
         userReturned.password = user.password;
         userReturned.posts = user.posts;
-    });
-    return fn(null, userReturned);
-    return fn(null, null); // if user not found in system;
-}
+        return fn(null, userReturned);
+        return fn(null, null); // if user not found in system;
+        */
+    //});
+//}
+function findOne (username, fn) {
+    User.findOne( { 'id': username }, fn);
+  }
 
 passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
   function(username, password, done) { //done is a callback function
@@ -79,6 +83,7 @@ passport.use(new LocalStrategy( //instantiating a class of local strategy / obje
           console.log("incorrect password " + password);
           return done(null, false, { message: 'Incorrect password.' });
         }
+        console.log('everything okay with ' + user.id);
         return done(null, user); // if everything goes okay ... username and password ok;
       });
     }
@@ -144,7 +149,8 @@ app.get('/api/users', function(req, res, next) {
       //if (!user) { return res.sendStatus(404); }
       if (!user) { return res.status(403).send(info.message); } //If we don't have any user send the string message stored in the info variable.
       req.login(user, function(err) { //passport created req.login in the initialize middleware
-        if (err) { return res.sendStatus(500); }
+        if (err) {
+          return res.sendStatus(500); }
         logger.info("now returning user info after auth");
         return res.send({users: [user]});
       });
@@ -160,9 +166,11 @@ app.get('/api/users', function(req, res, next) {
     return res.send({users: users});
   } else if (req.query.operation === 'getFollowing') {
     return res.send({users: users});
-  }
-  res.status(404);
-  res.end();
+  } else {
+    console.log("now going to give status of 404")
+    res.status(404);
+    res.end();
+    }
 });
 
 app.post('/api/users', function (req, res) {
@@ -173,14 +181,15 @@ app.post('/api/users', function (req, res) {
     var userToDb = new User({
       id: newUser.id,
       name: newUser.name,
-      email: newUser.password
+      email: newUser.email,
+      password: newUser.password
     });
 
     userToDb.save(function(err, userToDb){
       if(err) return console.error(err);
       console.dir(userToDb);
-    })
-    return res.send({user: newUser});
+      return res.send({user: newUser});
+    });
   });
 
 function ensureAuthenticated(req, res, next) {
