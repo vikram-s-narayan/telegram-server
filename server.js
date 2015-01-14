@@ -233,11 +233,22 @@ app.post('/api/posts', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
   //console.log("isAuthenticated via ensureAuthenticated: " + req.isAuthenticated());
   if (req.user.id===newPost.postCreator) {
-    var postId = posts.length+1;
+    /*var postId = posts.length+1;
     newPost.id = postId;
-    posts.push(newPost);
+    posts.push(newPost);*/
+    var postToDb = new Post({
+      postCreator: newPost.postCreator,
+      postContent: newPost.postContent,
+      createdAt: new Date()
+    });
 
-    return res.send({post: newPost});
+    postToDb.save(function(err, postToDb){
+      if(err) return console.error(err);
+      console.dir(postToDb);
+      return res.send({post: newPost});
+    });
+
+
   } else {
       console.log("cannot make this post");
       return res.status(403);
