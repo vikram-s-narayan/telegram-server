@@ -27,7 +27,17 @@ var userSchema = new Schema({
   posts: [{id: Number}]
 });
 
+var postSchema = new Schema({
+  id: Number,
+  postCreator: String,
+  postContent: String,
+  createdAt: Date
+});
+
 var User = mongoose.model('User', userSchema);
+
+var Post = mongoose.model('Post', postSchema);
+
 /*
 var userToDb = new User({
   id: "obelix",
@@ -47,7 +57,16 @@ User.findOne({ 'id': 'obelix' }, 'name email', function (err, user) {
   });
 */
 
+/*
+User.find({},function(err, docs) {
+    if (!err){
+      console.log(docs);
+      process.exit();
+    }
+    else { throw err;}
+    });
 
+*/
 //function findOne(username, fn) { //fn argument refers to the callback of the function;
   //Once username found, you call fn; this is an async function;
   //take username and send me the results via the fn function
@@ -163,9 +182,15 @@ app.get('/api/users', function(req, res, next) {
       return res.send({users: []});
     }
   } else if (req.query.operation === 'getFollowers') {
-    return res.send({users: users});
+    //return res.send({users: users});
+    User.find({}, function (err, docs) {
+      return res.send({users: docs});
+    });
   } else if (req.query.operation === 'getFollowing') {
-    return res.send({users: users});
+    //return res.send({users: users});
+    User.find({}, function (err, docs) {
+      return res.send({users: docs});
+    });
   } else {
     console.log("now going to give status of 404")
     res.status(404);
@@ -175,7 +200,7 @@ app.get('/api/users', function(req, res, next) {
 
 app.post('/api/users', function (req, res) {
   if (!req.body) return res.sendStatus(400);
-    newUser = req.body.user;
+    var newUser = req.body.user;
     //users.push(newUser);
     //console.log(newUser);
     var userToDb = new User({
