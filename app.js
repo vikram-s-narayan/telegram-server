@@ -7,7 +7,10 @@ var session = require('express-session') //creates and reads cookies to maintain
 
 var passport = require('passport')//handles authentication and authorization
 var LocalStrategy = require('passport-local').Strategy; //type of authentication where we authenticate off local store
-
+//temporary experiment
+var yay = require('./yay.js');
+yay.name();
+//temporary experiment ends here
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/telegram');
 var Schema = mongoose.Schema;
@@ -18,7 +21,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
 
 //userSchema is a description of data; connection is the pipe through which raw data flows;
 var userSchema = new Schema({
-  id: String, // {type: String, unique: true}, <= appears to be creating an error;
+  id: {type: String, unique: true},
   name: String,
   email: String,
   password: String,
@@ -37,6 +40,24 @@ var User = mongoose.model('User', userSchema);//behind the scenes, Mongoose crea
 //mongoose.model can be mongoose.connection.model
 var Post = mongoose.model('Post', postSchema);
 
+/*
+var userToDb = new User({
+  id: "obelix",
+  name: "Obelix the Gaul",
+  email: "obelix@gaul.com",
+  password: "gaul",
+});
+
+userToDb.save(function(err, userToDb) {
+  if (err) return console.error(err);
+  console.dir(userToDb);
+});
+
+User.findOne({ 'id': 'obelix' }, 'name email', function (err, user) {
+  if (err) return handleError(err);
+  console.log('%s has email: %s.', user.name, user.email);
+  });
+*/
 
 /*
 User.find({},function(err, docs) {
@@ -175,8 +196,7 @@ app.get('/api/users', function(req, res, next) {
   } else if (req.query.operation === 'getFollowing') {
     //return res.send({users: users});
     User.find({}, function (err, docs) {
-      var emberUsersArray = docs.map(emberUser);
-      return res.send({users: emberUsersArray});
+      return res.send({users: docs});
     });
   } else {
     console.log("now going to give status of 404")
@@ -184,7 +204,8 @@ app.get('/api/users', function(req, res, next) {
     res.end();
     }
 });
-
+//to copy
+/*
 app.post('/api/users', function (req, res) {
   if (!req.body) return res.sendStatus(400);
     var newUser = req.body.user;
@@ -211,7 +232,7 @@ app.post('/api/users', function (req, res) {
 
     });
   });
-
+*/
 
 function emberUser (user) {
   return {
@@ -270,6 +291,19 @@ db.once('open', function (callback) { //event fires when connection is establish
   });
 
 });
+
+/**
+* Router
+*/
+var router = require('./router')(app); //<= what happens here?
+
+// Error Handling
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+});
+
+module.exports = app;
+
 
 var users = [
   {
