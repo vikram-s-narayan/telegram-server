@@ -1,32 +1,17 @@
 var express = require('express'); //framework for node
-var bodyParser = require('body-parser'); //takes content of new posts and new users created (form input) and makes into json objects
+ //takes content of new posts and new users created (form input) and makes into json objects
 var logger = require('nlogger').logger(module); //module here is an object that contains info about this server.js file
-var cookieParser = require('cookie-parser');//takes cookies and makes into json objects
 
-var session = require('express-session') //creates and reads cookies to maintain sessions
 
-var passport = require('passport')//handles authentication and authorization
-var LocalStrategy = require('passport-local').Strategy; //type of authentication where we authenticate off local store
+ //type of authentication where we authenticate off local store
 //temporary experiment
 var yay = require('./yay.js');
 yay.name();
 //temporary experiment ends here
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/telegram');
-var Schema = mongoose.Schema;
-
-var db = mongoose.connection; //creates a default connection and stores it in mongoose.connection
-db.on('error', console.error.bind(console, 'connection error:'));
 
 
 //userSchema is a description of data; connection is the pipe through which raw data flows;
-var userSchema = new Schema({
-  id: {type: String, unique: true},
-  name: String,
-  email: String,
-  password: String,
-  posts: [{id: Number}]
-});
+
 
 var postSchema = new Schema({
   id: Number,
@@ -35,7 +20,7 @@ var postSchema = new Schema({
   createdAt: Date
 });
 
-var User = mongoose.model('User', userSchema);//behind the scenes, Mongoose creates a collection called 'users'
+
 //model consists of two parts - one is the connection the other is the description of data;
 //mongoose.model can be mongoose.connection.model
 var Post = mongoose.model('Post', postSchema);
@@ -90,25 +75,6 @@ function findOne (username, fn) {
     User.findOne( { 'id': username }, fn);
   }
 
-passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
-  function(username, password, done) { //done is a callback function
-    console.log("local strategy called");
-    findOne(username, function(err, user) { //matches "fn" in the function findOne
-      if (err) { return done(err); } //done function refers to the second argument
-        //of password.authenticate => function(err, user, info)
-        if (!user) {
-          console.log("incorrect username " + username);
-          return done(null, false, { message: 'Incorrect username.' });
-        }
-        if (!validPassword(user, password)) {
-          console.log("incorrect password " + password);
-          return done(null, false, { message: 'Incorrect password.' });
-        }
-        console.log('everything okay with ' + user.id);
-        return done(null, user); // if everything goes okay ... username and password ok;
-      });
-    }
-  ));
 
 
 
@@ -123,39 +89,11 @@ function validPassword(user, password){
 
 var app = express();
 
-app.use(cookieParser());//installed separately as it's been removed from Express
-app.use(bodyParser.json());
-app.use(session({ secret: 'apples and oranges', resave: false, saveUninitialized: true }));
-app.use(passport.initialize()); //this middleware (function with 3 arguments) ... and part of passport;
-app.use(passport.session());
+require('./middlewares')(app);
+
+require('./router')(app);
 
 
-passport.serializeUser(function(user, done) { //passport calls this behind the scenes;
-  done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-  findOne(id, function(err, user) {
-    done(err, user);
-  });
-});
-
-app.get('/api/users/:userid', function(req, res) {
-  var id = req.params.userid;
-  findOne(id, function(err, user){
-    if (err) {
-      return res.sendStatus(500);
-    }
-
-    if (!user){
-      return res.sendStatus(404);
-    }
-
-    return res.send({user: user});
-
-  });
-
-});
 
 app.get('/api/posts', function(req, res) {
   Post.find({}, function (err, docs) {
@@ -164,94 +102,6 @@ app.get('/api/posts', function(req, res) {
   //res.send({posts: posts}) //key can either be with or without quotes
 });
 
-app.get('/api/users', function(req, res, next) {
-  if (req.query.operation==="login") {
-    passport.authenticate('local', function(err, user, info){ //err, user and info
-      //are the arguments of the "done" function from local strategy;
-      console.log("passport.authenticate called");
-      if (err) { res.sendStatus(500); }
-      //if (!user) { return res.sendStatus(404); }
-      if (!user) { return res.status(403).send(info.message); } //If we don't have any user send the string message stored in the info variable.
-      req.login(user, function(err) { //passport created req.login in the initialize middleware
-        //req.login sets a cookie; uses the serializeUser function;
-        if (err) {
-          return res.sendStatus(500); }
-        logger.info("now returning user info after auth");
-        return res.send({users: [user]});
-      });
-    })(req, res, next);
-  } else if (req.query.operation === 'isAuthenticated') {//why do we need an else if here since the next "if" is nested?
-    // This means that the client is asking the server if the user who made this request is authenticated or not.
-      if (req.isAuthenticated()) {
-      return res.send({users: [req.user]});
-    } else {
-      return res.send({users: []});
-    }
-  } else if (req.query.operation === 'getFollowers') {
-    //return res.send({users: users});
-    User.find({}, function (err, docs) {
-      var emberUsersArray = docs.map(emberUser); //automatically applies ember user function on each object of array and returns new values array
-      return res.send({users: emberUsersArray});
-    });
-  } else if (req.query.operation === 'getFollowing') {
-    //return res.send({users: users});
-    User.find({}, function (err, docs) {
-      return res.send({users: docs});
-    });
-  } else {
-    console.log("now going to give status of 404")
-    res.status(404);
-    res.end();
-    }
-});
-//to copy
-/*
-app.post('/api/users', function (req, res) {
-  if (!req.body) return res.sendStatus(400);
-    var newUser = req.body.user;
-    //users.push(newUser);
-    //console.log(newUser);
-    var userToDb = new User({
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      password: newUser.password
-    });
-
-    userToDb.save(function(err, userToDb){
-      if(err) return console.error(err);
-      console.dir(userToDb);
-
-      req.login(userToDb, function(err) { //passport created req.login in the initialize middleware
-        //req.login sets a cookie; uses the serializeUser function;
-        if (err) {
-          return res.sendStatus(500); }
-          logger.info("now returning user info after auth");
-          return res.send({user: emberUser(userToDb)});
-        });
-
-    });
-  });
-*/
-
-function emberUser (user) {
-  return {
-    id: user.id,
-    name: user.name
-    }
-  }
-
-function ensureAuthenticated(req, res, next) {
-  console.log("middleware ensureAuthenticated called")
-  if (req.isAuthenticated()) {
-    console.log("user is allowed to do this action")
-    return next();
-  } else {
-    console.log("forbidden action");
-    //res.status(403).jsonp( {error: 'Forbidden action!'} );
-    res.sendStatus(403);//<=this is a better way to do it ... unless you need customization;
-  }
-}
 
 app.post('/api/posts', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
@@ -303,7 +153,6 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-
 
 var users = [
   {

@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-router.post('/api/users', function (req, res) {
+router.post('/', function (req, res) { //=> this translates to /api/users/
   if (!req.body) return res.sendStatus(400);
   var newUser = req.body.user;
   var userToDb = new User({
@@ -32,5 +32,6 @@ router.post('/api/users', function (req, res) {
       name: user.name
     }
   }
+
 
 module.exports = router; //should we be saying exports = module.exports = router?
