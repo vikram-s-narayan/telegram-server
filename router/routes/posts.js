@@ -1,9 +1,11 @@
 var express = require('express');
 var db = require('../../db');
-var User = db.model('Post');
+var Post = db.model('Post');
 var router = express.Router();
 var middlewares = require('../../middlewares');
 var ensureAuthenticated = middlewares.ensureAuthenticated;
+
+
 router.get('/', function(req, res) {
   Post.find({}, function (err, docs) {
     return res.send({posts: docs});
@@ -13,9 +15,6 @@ router.get('/', function(req, res) {
 router.post('/', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
   if (req.user.id===newPost.postCreator) {
-    /*var postId = posts.length+1;
-    newPost.id = postId;
-    posts.push(newPost);*/
     var postToDb = new Post({
       postCreator: newPost.postCreator,
       postContent: newPost.postContent,
@@ -27,7 +26,6 @@ router.post('/', ensureAuthenticated, function (req, res){
       console.dir(postToDb);
       return res.send({post: postToDb});
     });
-
 
   } else {
     console.log("cannot make this post");

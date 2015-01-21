@@ -1,10 +1,10 @@
 var passport = require('passport')//handles authentication and authorization
 var LocalStrategy = require('passport-local').Strategy;
-
+//need to import User
 passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
   function(username, password, done) { //done is a callback function
     console.log("local strategy called");
-    findOne(username, function(err, user) { //matches "fn" in the function findOne
+    User.findOne({'id': username}, function(err, user) { //matches "fn" in the function findOne
     if (err) { return done(err); } //done function refers to the second argument
       //of password.authenticate => function(err, user, info)
       if (!user) {
@@ -40,4 +40,4 @@ function validPassword(user, password){
   }
 }
 
-exports = module.exports = passport;
+var exports = module.exports = passport;
