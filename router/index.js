@@ -11,5 +11,5 @@ module.exports = function (app) {
   app.use('/api/users', require('./routes/users'));//this is a 'mini-router'
   //And now when we concatenate the urls /api/users + / we get /api/users/ - exactly what we want for POST /api/users.
   app.use('/api/posts', require('./routes/posts')); //single . means start from the current folder;
-
+  app.use('/api/logout', require('./routes/logout'));
 };

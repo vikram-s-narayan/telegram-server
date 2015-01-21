@@ -1,6 +1,6 @@
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');//takes cookies and makes into json objects
-var passport = require('./middlewares/auth');
+//var passport = require('./middlewares/auth');
 var session = require('express-session')
 var passport = require('./auth');
 

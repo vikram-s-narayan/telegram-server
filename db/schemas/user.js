@@ -1,3 +1,5 @@
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 var userSchema = new Schema({
   id: {type: String, unique: true},
   name: String,
@@ -6,4 +8,4 @@ var userSchema = new Schema({
   posts: [{id: Number}]
 });
 
-exports = module.exports = userSchema;
+var exports = module.exports = userSchema;

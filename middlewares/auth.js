@@ -32,4 +32,12 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
+function validPassword(user, password){
+  if (user.password === password) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 exports = module.exports = passport;
