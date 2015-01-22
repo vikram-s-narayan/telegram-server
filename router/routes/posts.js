@@ -2,12 +2,16 @@ var express = require('express');
 var db = require('../../db');
 var Post = db.model('Post');
 var router = express.Router();
-var middlewares = require('../../middlewares');
-var ensureAuthenticated = middlewares.ensureAuthenticated;
+var ensureAuthenticated = require('../../middlewares/ensureAuthenticated');
+//var ensureAuthenticated = middlewares.ensureAuthenticated;
+
 
 
 router.get('/', function(req, res) {
+  console.log('now trying to get all posts');
   Post.find({}, function (err, docs) {
+    console.log("now in the call back of posts", docs);
+    
     return res.send({posts: docs});
   });
 });

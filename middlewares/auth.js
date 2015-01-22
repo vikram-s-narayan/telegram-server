@@ -1,6 +1,9 @@
 var passport = require('passport')//handles authentication and authorization
 var LocalStrategy = require('passport-local').Strategy;
 //need to import User
+var db = require('../db');
+var User = db.model('User');
+
 passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
   function(username, password, done) { //done is a callback function
     console.log("local strategy called");
@@ -27,8 +30,9 @@ passport.serializeUser(function(user, done) { //passport calls this behind the s
 });
 
 passport.deserializeUser(function(id, done) {
-  findOne(id, function(err, user) {
-    done(err, user);
+  User.findOne({id: id}, function(err, user) {
+    console.log('Now about to call on "done" callback in deserialize function');
+    done(err, user);//if no user exists, it will return null and null; 
   });
 });
 

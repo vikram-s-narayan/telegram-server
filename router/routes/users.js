@@ -2,6 +2,9 @@ var express = require('express');
 var db = require('../../db');
 var User = db.model('User');
 var router = express.Router();
+//var ensureAuthenticated = require('../../middlewares');
+//var passport = require('passport');
+var passport = require('../../middlewares/auth');
 
 router.post('/', function (req, res) { //=> this translates to /api/users/
   if (!req.body) return res.sendStatus(400);
@@ -15,21 +18,19 @@ router.post('/', function (req, res) { //=> this translates to /api/users/
 
   userToDb.save(function(err, userToDb){
     if(err) return console.error(err);
+    console.log("user info saved");
     console.dir(userToDb);
 
     req.login(userToDb, function(err) { //passport created req.login in the initialize middleware
       //req.login sets a cookie; uses the serializeUser function;
       if (err) {
         return res.sendStatus(500); }
-        logger.info("now returning user info after auth");
+        console.log("now returning user info after auth");
         return res.send({user: emberUser(userToDb)});
       });
 
     });
   });
-
-
-
 
 
 router.get('/', function(req, res, next) {
@@ -44,11 +45,11 @@ router.get('/', function(req, res, next) {
           //req.login sets a cookie; uses the serializeUser function;
           if (err) {
             return res.sendStatus(500); }
-            logger.info("now returning user info after auth");
+            console.log("now returning user info after auth");
             return res.send({users: [user]});
           });
         })(req, res, next);
-      } else if (req.query.operation === 'isAuthenticated') {//why do we need an else if here since the next "if" is nested?
+      } else if (req.query.operation === 'isAuthenticated') {
         // This means that the client is asking the server if the user who made this request is authenticated or not.
         if (req.isAuthenticated()) {
           return res.send({users: [req.user]});
@@ -99,4 +100,4 @@ function emberUser (user) {
   }
 }
 
-module.exports = router; //should we be saying exports = module.exports = router?
+module.exports = router; //should we be saying var exports = module.exports = router?
