@@ -46,26 +46,27 @@ router.get('/', function(req, res, next) {
           if (err) {
             return res.sendStatus(500); }
             console.log("now returning user info after auth");
-            return res.send({users: [user]});
+            return res.send({users: [emberUser(user)]});
           });
         })(req, res, next);
       } else if (req.query.operation === 'isAuthenticated') {
         // This means that the client is asking the server if the user who made this request is authenticated or not.
         if (req.isAuthenticated()) {
-          return res.send({users: [req.user]});
+          return res.send({users: [emberUser(req.user)]});
         } else {
           return res.send({users: []});
         }
       } else if (req.query.operation === 'getFollowers') {
         //return res.send({users: users});
         User.find({}, function (err, docs) {
-          var emberUsersArray = docs.map(emberUser); //automatically applies ember user function on each object of array and returns new values array
+          var emberUsersArray = docs.map(emberUser);
           return res.send({users: emberUsersArray});
         });
       } else if (req.query.operation === 'getFollowing') {
-        //return res.send({users: users});
         User.find({}, function (err, docs) {
-          return res.send({users: docs});
+          //return res.send({users: docs});
+          var emberUsersArray = docs.map(emberUser);
+          return res.send({users: emberUsersArray});
         });
       } else {
         console.log("now going to give status of 404")
