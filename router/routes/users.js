@@ -86,7 +86,7 @@ router.get('/:userid', function(req, res) {
       return res.sendStatus(404);
     }
 
-    return res.send({user: user});
+    return res.send({user: emberUser(user)});
 
   });
 
