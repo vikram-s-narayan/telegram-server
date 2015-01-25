@@ -11,7 +11,7 @@ router.get('/', function(req, res) {
   console.log('now trying to get all posts');
   Post.find({}, function (err, docs) {
     console.log("now in the call back of posts", docs);
-    
+
     return res.send({posts: docs});
   });
 });
@@ -39,4 +39,4 @@ router.post('/', ensureAuthenticated, function (req, res){
 });
 
 
-module.exports = router;
+exports = module.exports = router;

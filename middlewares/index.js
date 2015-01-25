@@ -4,7 +4,7 @@ var cookieParser = require('cookie-parser');//takes cookies and makes into json 
 var session = require('express-session')
 var passport = require('./auth');
 
-module.exports = function (app) {
+exports = module.exports = function (app) {
   app.use(cookieParser());
   app.use(bodyParser.json());
   app.use(session({ secret: 'apples and oranges', resave: false, saveUninitialized: true }));

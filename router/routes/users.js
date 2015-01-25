@@ -2,12 +2,10 @@ var express = require('express');
 var db = require('../../db');
 var User = db.model('User');
 var router = express.Router();
-//var ensureAuthenticated = require('../../middlewares');
-//var passport = require('passport');
 var passport = require('../../middlewares/auth');
 
 router.post('/', function (req, res) { //=> this translates to /api/users/
-  if (!req.body) return res.sendStatus(400);
+if (!req.body) return res.sendStatus(400);
   var newUser = req.body.user;
   var userToDb = new User({
     id: newUser.id,
@@ -20,18 +18,15 @@ router.post('/', function (req, res) { //=> this translates to /api/users/
     if(err) return console.error(err);
     console.log("user info saved");
     console.dir(userToDb);
-
     req.login(userToDb, function(err) { //passport created req.login in the initialize middleware
       //req.login sets a cookie; uses the serializeUser function;
       if (err) {
         return res.sendStatus(500); }
         console.log("now returning user info after auth");
         return res.send({user: emberUser(userToDb)});
-      });
-
     });
   });
-
+});
 
 router.get('/', function(req, res, next) {
   if (req.query.operation==="login") {
@@ -101,4 +96,4 @@ function emberUser (user) {
   }
 }
 
-module.exports = router; //should we be saying var exports = module.exports = router?
+exports = module.exports = router;

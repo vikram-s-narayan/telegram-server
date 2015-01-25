@@ -7,4 +7,4 @@ var postSchema = new Schema({
   createdAt: Date
 });
 
-var exports = module.exports = postSchema;
+exports = module.exports = postSchema;

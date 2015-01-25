@@ -32,7 +32,7 @@ passport.serializeUser(function(user, done) { //passport calls this behind the s
 passport.deserializeUser(function(id, done) {
   User.findOne({id: id}, function(err, user) {
     console.log('Now about to call on "done" callback in deserialize function');
-    done(err, user);//if no user exists, it will return null and null; 
+    done(err, user);//if no user exists, it will return null and null;
   });
 });
 
@@ -44,4 +44,4 @@ function validPassword(user, password){
   }
 }
 
-var exports = module.exports = passport;
+exports = module.exports = passport;
