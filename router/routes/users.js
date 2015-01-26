@@ -3,15 +3,19 @@ var db = require('../../db');
 var User = db.model('User');
 var router = express.Router();
 var passport = require('../../middlewares/auth');
+var bcrypt = require('bcrypt');
 
 router.post('/', function (req, res) { //=> this translates to /api/users/
 if (!req.body) return res.sendStatus(400);
   var newUser = req.body.user;
+  //var salt = bcrypt.genSaltSync(10);
+  var hash = bcrypt.hashSync(newUser.password, 8);
+  console.log('users password hashed and salted is: ', hash);
   var userToDb = new User({
     id: newUser.id,
     name: newUser.name,
     email: newUser.email,
-    password: newUser.password
+    password: hash
   });
 
   userToDb.save(function(err, userToDb){
@@ -52,14 +56,12 @@ router.get('/', function(req, res, next) {
           return res.send({users: []});
         }
       } else if (req.query.operation === 'getFollowers') {
-        //return res.send({users: users});
         User.find({}, function (err, docs) {
           var emberUsersArray = docs.map(emberUser);
           return res.send({users: emberUsersArray});
         });
       } else if (req.query.operation === 'getFollowing') {
         User.find({}, function (err, docs) {
-          //return res.send({users: docs});
           var emberUsersArray = docs.map(emberUser);
           return res.send({users: emberUsersArray});
         });

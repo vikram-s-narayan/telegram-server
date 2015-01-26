@@ -3,6 +3,7 @@ var LocalStrategy = require('passport-local').Strategy;
 //need to import User
 var db = require('../db');
 var User = db.model('User');
+var bcrypt = require('bcrypt');
 
 passport.use(new LocalStrategy( //instantiating a class of local strategy / object;
   function(username, password, done) { //done is a callback function
@@ -37,11 +38,11 @@ passport.deserializeUser(function(id, done) {
 });
 
 function validPassword(user, password){
-  if (user.password === password) {
-    return true;
-  } else {
-    return false;
-  }
+  //var passwordIsValid = (user.password === password);
+  console.log("entered by user ",password);
+  console.log("from DB ",user.password);
+  var passwordIsValid = bcrypt.compareSync(password, user.password);
+  return passwordIsValid;
 }
 
 exports = module.exports = passport;
