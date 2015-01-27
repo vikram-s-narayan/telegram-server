@@ -9,25 +9,29 @@ router.post('/', function (req, res) { //=> this translates to /api/users/
 if (!req.body) return res.sendStatus(400);
   var newUser = req.body.user;
   //var salt = bcrypt.genSaltSync(10);
-  var hash = bcrypt.hashSync(newUser.password, 8);
-  console.log('users password hashed and salted is: ', hash);
-  var userToDb = new User({
-    id: newUser.id,
-    name: newUser.name,
-    email: newUser.email,
-    password: hash
-  });
-
-  userToDb.save(function(err, userToDb){
-    if(err) return console.error(err);
-    console.log("user info saved");
-    console.dir(userToDb);
-    req.login(userToDb, function(err) { //passport created req.login in the initialize middleware
-      //req.login sets a cookie; uses the serializeUser function;
-      if (err) {
-        return res.sendStatus(500); }
-        console.log("now returning user info after auth");
-        return res.send({user: emberUser(userToDb)});
+  //var hash = bcrypt.hashSync(newUser.password, salt);
+  //console.log('users password hashed and salted is: ', hash);
+  bcrypt.genSalt(10, function(err, salt) {
+    bcrypt.hash(newUser.password, salt, function(err, hash) {
+      // Store hash in your password DB.
+      if(err) return console.error(err);
+      var userToDb = new User({
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        password: hash
+      });
+      userToDb.save(function(err, userToDb){
+        if(err) return console.error(err);
+        console.log("user info saved");
+        console.dir(userToDb);
+        req.login(userToDb, function(err) { 
+          if (err) {
+            return res.sendStatus(500); }
+            console.log("now returning user info after auth");
+            return res.send({user: emberUser(userToDb)});
+          });
+        });
     });
   });
 });
