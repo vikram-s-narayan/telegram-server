@@ -6,20 +6,22 @@ var User = db.model('User');
 var bcrypt = require('bcrypt');
 
 passport.use(new LocalStrategy(
-  function(username, password, done) {
-    console.log("local strategy called");
+  function(username, password, done){
     User.findOne({'id': username}, function(err, user) {
-    if (err) { return done(err); }
-      if (!user) {
-        console.log("incorrect username " + username);
-        return done(null, false, { message: 'Incorrect username.' });
+      if (err) {
+        return done(err);
+      } else if (!user) {
+        return done(null, false, {message: 'Incorrect username.'});
+      } else {
+        validPassword(user, password, function(err, result) {
+          if (err) { return done(err);
+          } else if (result) {
+            return done(null, user, {message: 'Everything ok'});
+          } else {
+            return done(null, false, {message: 'Incorrect password'})
+          }
+        });
       }
-      if (!validPassword(user, password)) {
-        console.log("incorrect password " + password);
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-      console.log('everything okay with ' + user.id);
-      return done(null, user); // if everything goes okay ... username and password ok;
     });
   }
 ));
@@ -36,8 +38,10 @@ passport.deserializeUser(function(id, done) {
 });
 
 
-function validPassword(user, password){
-  return bcrypt.compareSync(password, user.password)
+function validPassword(user, password, done){
+  bcrypt.compare(password, user.password, function(err, result){
+    done(err, result);
+  });
 }
 
 exports = module.exports = passport;
