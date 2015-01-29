@@ -4,8 +4,13 @@ var User = db.model('User');
 var router = express.Router();
 var passport = require('../../middlewares/auth');
 var bcrypt = require('bcrypt');
+var generatePassword = require('password-generator');
 
 router.post('/', function (req, res) { //=> this translates to /api/users/
+  var operation = req.body.user.meta.operation;
+  var email = req.body.user.email;
+  var password = req.body.user.meta.password
+
 if (!req.body) return res.sendStatus(400);
   var newUser = req.body.user;
   bcrypt.genSalt(10, function(err, salt) {
@@ -65,6 +70,20 @@ router.get('/', function(req, res, next) {
           var emberUsersArray = docs.map(emberUser);
           return res.send({users: emberUsersArray});
         });
+      } else if (req.query.operation === 'passwordReset'){
+          User.find({email: req.query.email}, function(err, user) {
+            if (err) {console.log(err);}
+            if(user){
+            var newPassword = generateNewPassword();
+            var md5Password = md5(newPassword);
+            //var bcryptPassword = ...
+            // update db with user data (findOne or findById);
+            // fire email
+
+          } else {
+            res.status(404).send({message: "user not in system"});
+          }
+          } )
       } else {
         console.log("now going to give status of 404")
         res.status(404);
@@ -87,7 +106,6 @@ router.get('/:userid', function(req, res) {
     return res.send({user: emberUser(user)});
 
   });
-
 });
 
 
@@ -96,6 +114,11 @@ function emberUser (user) {
     id: user.id,
     name: user.name
   }
+}
+
+function generateNewPassword(){
+  var newPassword = generatePassword(12, false);
+  return newPassword;
 }
 
 exports = module.exports = router;
