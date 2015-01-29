@@ -8,5 +8,4 @@ exports = module.exports = function (app) {
 //And now when we concatenate the urls /api/users + / we get /api/users/ - exactly what we want for POST /api/users.
   app.use('/api/posts', require('./routes/posts')); //single . means start from the current folder;
   app.use('/api/logout', require('./routes/logout'));
-  app.use('/api/reset', require('./routes/reset'));
 };

@@ -5,11 +5,15 @@ var router = express.Router();
 var passport = require('../../middlewares/auth');
 var bcrypt = require('bcrypt');
 var generatePassword = require('password-generator');
+var md5 = require('MD5'); //confirm this md5 and one in ember are the same;
+var api_key = 'key-5d859d5065f347d54079bfd45effd0b0';
+var domain = 'sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org';
+var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 
 router.post('/', function (req, res) { //=> this translates to /api/users/
-  var operation = req.body.user.meta.operation;
+  //var operation = req.body.user.meta.operation;
   var email = req.body.user.email;
-  var password = req.body.user.meta.password
+  //var password = req.body.user.meta.password
 
 if (!req.body) return res.sendStatus(400);
   var newUser = req.body.user;
@@ -71,20 +75,46 @@ router.get('/', function(req, res, next) {
           return res.send({users: emberUsersArray});
         });
       } else if (req.query.operation === 'passwordReset'){
-          User.find({email: req.query.email}, function(err, user) {
-            if (err) {console.log(err);}
-            if(user){
-            var newPassword = generateNewPassword();
-            var md5Password = md5(newPassword);
-            //var bcryptPassword = ...
-            // update db with user data (findOne or findById);
-            // fire email
+        //super-nesting starts here
+          var email = req.query.email;
+          var newPassword = generateNewPassword();
+          var md5Password = md5(newPassword);
+          bcrypt.genSalt(10, function(err, salt) {
+            bcrypt.hash(md5Password, salt, function(err, hash){
+              if(err) {console.log(err);}
+              var query = {"email": email};
+              var update = {password: hash};
+              var options = {new: true};
+              User.findOneAndUpdate(query, update, options, function(err, user){
+                if(err) {
+                  console.log(err);
+                } else if (user===null) {
+                  console.log("user NOT in system and email is", email);
+                  res.status(404).send({message: "user not in system"});
+                } else {
+                  console.log("user in system and email is", email);
+
+                  var data = {
+                    from: 'Super Vik <vikram@freado.com>',
+                    to: email,
+                    subject: 'Password',
+                    text: newPassword
+                  };
+
+                  mailgun.messages().send(data, function (error, body) {
+                    console.log(body);
+                  });
+                  return res.sendStatus(200);
+
+                }
+
+              });
+            });
+          });
+
+        //super-nesting ends here
 
           } else {
-            res.status(404).send({message: "user not in system"});
-          }
-          } )
-      } else {
         console.log("now going to give status of 404")
         res.status(404);
         res.end();
