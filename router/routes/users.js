@@ -5,10 +5,14 @@ var router = express.Router();
 var passport = require('../../middlewares/auth');
 var bcrypt = require('bcrypt');
 var generatePassword = require('password-generator');
-var md5 = require('MD5'); //confirm this md5 and one in ember are the same;
-var api_key = 'key-5d859d5065f347d54079bfd45effd0b0';
+var md5 = require('MD5');
+var api_key = 'key-66a7f0cf094c6ae8f1a827df5795b852';
 var domain = 'sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org';
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
+var fs = require('fs');
+var path = require('path');//helps concatenate two paths
+var filePath = path.join(__dirname, '../../templates/forgotpassword'); //dirname - path to the global  global variable in node; stores path of source files; other one is our path to the template
+var Handlebars = require('handlebars');
 
 router.post('/', function (req, res) { //=> this translates to /api/users/
   //var operation = req.body.user.meta.operation;
@@ -17,6 +21,10 @@ router.post('/', function (req, res) { //=> this translates to /api/users/
 
 if (!req.body) return res.sendStatus(400);
   var newUser = req.body.user;
+  /*
+  User.encryptPassword(newUser.password, function(err, hash){ ...})//bcrypt salt and hash;
+  */
+
   bcrypt.genSalt(10, function(err, salt) {
     bcrypt.hash(newUser.password, salt, function(err, hash) {
       if(err) return console.error(err);
@@ -93,24 +101,32 @@ router.get('/', function(req, res, next) {
                   res.status(404).send({message: "user not in system"});
                 } else {
                   console.log("user in system and email is", email);
+                 fs.readFile(filePath, {encoding: 'utf-8'}, function (err, fileData) {
+                    if (err) {
+                      throw err;
+                    } else {
+                    var template = Handlebars.compile(fileData);
+                    var data = { "password": newPassword }
+                    var result = template(data);
+                    //console.log("this is data ho ho ho!", result);
 
-                  var data = {
+                    var emailData = {
                     from: 'Super Vik <vikram@freado.com>',
                     to: email,
                     subject: 'Password',
-                    text: newPassword
+                    html: result
                   };
-
-                  mailgun.messages().send(data, function (error, body) {
-                    console.log(body);
-                  });
-                  return res.sendStatus(200);
-
-                }
-
-              });
+                  mailgun.messages().send(emailData, function (error, body) {
+                  console.log(body);
+                  return res.send({users: []});
+                });
+              }
             });
-          });
+          }
+        });
+      });
+    });
+
 
         //super-nesting ends here
 
@@ -133,7 +149,7 @@ router.get('/:userid', function(req, res) {
       return res.sendStatus(404);
     }
 
-    return res.send({user: emberUser(user)});
+    return res.send({user: emberUser(user)});//
 
   });
 });
