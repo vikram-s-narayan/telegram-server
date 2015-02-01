@@ -1,6 +1,5 @@
 var passport = require('passport')//handles authentication and authorization
 var LocalStrategy = require('passport-local').Strategy;
-//need to import User
 var db = require('../db');
 var User = db.model('User');
 var bcrypt = require('bcrypt');

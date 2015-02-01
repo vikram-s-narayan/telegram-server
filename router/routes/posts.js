@@ -10,6 +10,8 @@ router.get('/', function(req, res) {
   });
 });
 
+//Post.find({ id:333 }).remove().exec();
+
 router.post('/', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
   if (req.user.id===newPost.postCreator) {

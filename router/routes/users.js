@@ -130,7 +130,7 @@ router.get('/', function(req, res, next) {
 
         //super-nesting ends here
 
-          } else {
+      } else {
         console.log("now going to give status of 404")
         res.status(404);
         res.end();
