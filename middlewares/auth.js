@@ -5,6 +5,10 @@ var User = db.model('User');
 var bcrypt = require('bcrypt');
 
 passport.use(new LocalStrategy(
+  {
+    usernameField: 'user[id]'
+    , passwordField: 'user[meta][password]'
+  },
   function(username, password, done){
     User.findOne({'id': username}, function(err, user) {
       if (err) {
