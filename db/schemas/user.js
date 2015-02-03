@@ -1,5 +1,8 @@
 var mongoose = require('mongoose');
+var bcrypt = require('bcrypt');
+
 var Schema = mongoose.Schema;
+
 var userSchema = new Schema({
   id: {type: String, unique: true},
   name: String,
@@ -14,5 +17,21 @@ userSchema.methods.toEmber = function(cb) {
     name: this.name
   }
 }
+
+userSchema.statics.encryptPassword = function (password, cb) {
+  bcrypt.genSalt(10, function(err, salt) {
+    bcrypt.hash(password, salt, function(err, hash) {
+      if(err) {
+        return console.error(err);
+      } else {
+        console.log("returning hash");
+        cb(err, hash);
+      }
+    });
+  });
+}
+
+var User = mongoose.model('User', userSchema);
+
 
 exports = module.exports = userSchema;

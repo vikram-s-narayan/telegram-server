@@ -36,37 +36,37 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
   } else if (operation === 'signup') {
     if (!req.body) return res.sendStatus(400);
     var newUser = req.body.user;
-    /*
-    User.encryptPassword(newUser.password, function(err, hash){ ...})//bcrypt salt and hash;
-    */
-    bcrypt.genSalt(10, function(err, salt) {
-      bcrypt.hash(password, salt, function(err, hash) {
-        if(err) return console.error(err);
-        var userToDb = new User({
-          id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
-          password: hash
-        });
-        userToDb.save(function(err, userToDb){
-          if(err) return console.error(err);
-          console.log("user info saved");
-          console.dir(userToDb);
-          req.login(userToDb, function(err) {
-            if (err) {
-              return res.sendStatus(500); }
-              console.log("now returning user info after auth");
-              console.log("userToDb.toEmber is ...", userToDb.toEmber());
-              return res.send({user: userToDb.toEmber()})
-            });
-          });
-        });
+    console.log(newUser);
+    console.log(newUser.meta.password);
+    User.encryptPassword(newUser.meta.password, function(err, hash) {
+      console.log("got the hash. now creating userToDb");
+      var userToDb = new User({
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      password: hash
+    });
+    userToDb.save(function(err, userToDb) {
+      if(err) return console.error(err);
+      console.log('user info saved');
+      console.dir(userToDb);
+      req.login(userToDb, function(err) {
+        if (err) {
+          return res.sendStatus(500);
+          } else {
+          console.log("now returning user info after auth");
+          console.log("userToDb.toEmber is ...", userToDb.toEmber());
+          return res.send({user: userToDb.toEmber()});
+        }
       });
+    });
+  });
   } else if (operation === 'passwordReset') {
     //super-nesting starts here
     var email = req.body.user.email;
     var newPassword = generateNewPassword();
     var md5Password = md5(newPassword);
+
     bcrypt.genSalt(10, function(err, salt) {
       bcrypt.hash(md5Password, salt, function(err, hash){
         if(err) {console.log(err);}
@@ -104,7 +104,6 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
         });
       });
     });
-
     //super-nesting ends here
   }
 });
