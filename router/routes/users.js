@@ -6,7 +6,7 @@ var passport = require('../../middlewares/auth');
 var bcrypt = require('bcrypt');
 var generatePassword = require('password-generator');
 var md5 = require('MD5');
-var api_key = 'key-ca9dc9487107edeba3fbb0333f75782f'//'key-66a7f0cf094c6ae8f1a827df5795b852';
+var api_key = 'key-ca9dc9487107edeba3fbb0333f75782f';
 var domain = 'sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org';
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 var fs = require('fs');
@@ -67,44 +67,41 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
     var newPassword = generateNewPassword();
     var md5Password = md5(newPassword);
 
-    bcrypt.genSalt(10, function(err, salt) {
-      bcrypt.hash(md5Password, salt, function(err, hash){
-        if(err) {console.log(err);}
-        var query = {"email": email};
-        var update = {password: hash};
-        var options = {new: true};
-        User.findOneAndUpdate(query, update, options, function(err, user){
-          if(err) {
-            console.log(err);
-          } else if (user===null) {
-            console.log("user NOT in system and email is", email);
-            res.status(404).send({message: "user not in system"});
-          } else {
-            console.log("user in system and email is", email);
-            fs.readFile(filePath, {encoding: 'utf-8'}, function (err, fileData) {
-              if (err) {
-                throw err;
-              } else {
-                var template = Handlebars.compile(fileData);
-                var data = { "password": newPassword }
-                var result = template(data);
-                var emailData = {
-                  from: 'Super Vik <vikram@freado.com>',
-                  to: email,
-                  subject: 'Password',
-                  html: result
-                };
-                mailgun.messages().send(emailData, function (error, body) {
-                  console.log(body);
-                  return res.send({users: []});
-                });
-              }
-            });
-          }
-        });
+    User.encryptPassword(md5Password, function(err, hash) {
+      if(err) {console.log(err);}
+      var query = {"email": email};
+      var update = {password: hash};
+      var options = {new: true};
+      User.findOneAndUpdate(query, update, options, function(err, user){
+        if(err) {
+          console.log(err);
+        } else if (user===null) {
+          console.log("user NOT in system and email is", email);
+          res.status(404).send({message: "user not in system"});
+        } else {
+          console.log("user in system and email is", email);
+          fs.readFile(filePath, {encoding: 'utf-8'}, function (err, fileData) {
+            if (err) {
+              throw err;
+            } else {
+              var template = Handlebars.compile(fileData);
+              var data = { "password": newPassword }
+              var result = template(data);
+              var emailData = {
+                from: 'Super Vik <vikram@freado.com>',
+                to: email,
+                subject: 'Password',
+                html: result
+              };
+              mailgun.messages().send(emailData, function (error, body) {
+                console.log(body);
+                return res.send({users: []});
+              });
+            }
+          });
+        }
       });
     });
-    //super-nesting ends here
   }
 });
 

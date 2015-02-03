@@ -16,8 +16,8 @@ passport.use(new LocalStrategy(
       } else if (!user) {
         return done(null, false, {message: 'Incorrect username.'});
       } else {
-        //user.checkPassword(password, function(err, result){ ...}); <=this is better because you want to do it on an existing user;
-        //User.checkPassword(user, password, function(err, result){})
+        //user.checkPassword(password, function(err, result){ ...}); 
+
         validPassword(user, password, function(err, result) {
           if (err) { return done(err);
           } else if (result) {
