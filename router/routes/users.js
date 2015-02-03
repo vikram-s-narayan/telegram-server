@@ -11,7 +11,7 @@ var domain = 'sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org';
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 var fs = require('fs');
 var path = require('path');//helps concatenate two paths
-var filePath = path.join(__dirname, '../../templates/forgotpassword'); //dirname - path to the global  global variable in node; stores path of source files; other one is our path to the template
+var filePath = path.join(__dirname, '../../templates/forgotpassword'); //dirname - path to the local directory in node where the source file is;
 var Handlebars = require('handlebars');
 
 router.post('/', function (req, res, next) { //=> this translates to /api/users/
@@ -20,28 +20,25 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
   var password = req.body.user.meta.password
 
   if(operation === 'login'){
-    //... login
     passport.authenticate('local', function(err, user, info){
       console.log("passport.authenticate called");
       if (err) { res.sendStatus(500); }
-      //if (!user) { return res.sendStatus(404); }
       if (!user) { return res.status(403).send(info.message); } //If we don't have any user send the string message stored in the info variable.
         req.login(user, function(err) { //passport created req.login in the initialize middleware
           //req.login sets a cookie; uses the serializeUser function;
           if (err) {
             return res.sendStatus(500); }
             console.log("now returning user info after auth");
-            return res.send({users: [emberUser(user)]});
+            console.log("now returning user.toEmber ...", user.toEmber());
+            return res.send({users: [user.toEmber()]})
           });
         })(req, res, next);
   } else if (operation === 'signup') {
-    // ... signup
     if (!req.body) return res.sendStatus(400);
     var newUser = req.body.user;
     /*
     User.encryptPassword(newUser.password, function(err, hash){ ...})//bcrypt salt and hash;
     */
-
     bcrypt.genSalt(10, function(err, salt) {
       bcrypt.hash(password, salt, function(err, hash) {
         if(err) return console.error(err);
@@ -59,14 +56,13 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
             if (err) {
               return res.sendStatus(500); }
               console.log("now returning user info after auth");
-              return res.send({user: emberUser(userToDb)});
+              console.log("userToDb.toEmber is ...", userToDb.toEmber());
+              return res.send({user: userToDb.toEmber()})
             });
           });
         });
       });
   } else if (operation === 'passwordReset') {
-    //...reset the password
-
     //super-nesting starts here
     var email = req.body.user.email;
     var newPassword = generateNewPassword();
@@ -92,8 +88,6 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
                 var template = Handlebars.compile(fileData);
                 var data = { "password": newPassword }
                 var result = template(data);
-                //console.log("this is data ho ho ho!", result);
-
                 var emailData = {
                   from: 'Super Vik <vikram@freado.com>',
                   to: email,
@@ -118,20 +112,26 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
 router.get('/', function(req, res, next) {
 
   if (req.query.operation === 'isAuthenticated') {
-        // This means that the client is asking the server if the user who made this request is authenticated or not.
         if (req.isAuthenticated()) {
-          return res.send({users: [emberUser(req.user)]});
+          console.log("now returning authenticated user ...", req.user.toEmber())
+          return res.send({users: [req.user.toEmber()]});
         } else {
           return res.send({users: []});
         }
       } else if (req.query.operation === 'getFollowers') {
         User.find({}, function (err, docs) {
-          var emberUsersArray = docs.map(emberUser);
+          console.log('returning followers');
+          var emberUsersArray = docs.map(function(user){
+            return user.toEmber();
+          });
           return res.send({users: emberUsersArray});
         });
       } else if (req.query.operation === 'getFollowing') {
         User.find({}, function (err, docs) {
-          var emberUsersArray = docs.map(emberUser);
+          console.log('returning following');
+          var emberUsersArray = docs.map(function(user){
+            return user.toEmber();
+          });
           return res.send({users: emberUsersArray});
         });
       } else {
@@ -153,18 +153,11 @@ router.get('/:userid', function(req, res) {
       return res.sendStatus(404);
     }
 
-    return res.send({user: emberUser(user)});//
-
+    console.log("returning in :userid ...", user.toEmber());
+    return res.send({user: user.toEmber()});//8
   });
 });
 
-
-function emberUser (user) {
-  return {
-    id: user.id,
-    name: user.name
-  }
-}
 
 function generateNewPassword(){
   var newPassword = generatePassword(12, false);

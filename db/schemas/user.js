@@ -8,4 +8,11 @@ var userSchema = new Schema({
   posts: [{id: Number}]
 });
 
+userSchema.methods.toEmber = function(cb) {
+  return {
+    id: this.id,
+    name: this.name
+  }
+}
+
 exports = module.exports = userSchema;
