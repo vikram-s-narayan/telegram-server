@@ -16,16 +16,18 @@ passport.use(new LocalStrategy(
       } else if (!user) {
         return done(null, false, {message: 'Incorrect username.'});
       } else {
-        //user.checkPassword(password, function(err, result){ ...}); 
-
-        validPassword(user, password, function(err, result) {
-          if (err) { return done(err);
+        user.checkPassword(user, password, function(err, result){
+          if (err) {
+            console.log('error in checkPassword');
+            return done(err);
           } else if (result) {
+            console.log('Everything ok');
             return done(null, user, {message: 'Everything ok'});
           } else {
+            console.log('incorrect password');
             return done(null, false, {message: 'Incorrect password'})
           }
-        });
+          });
       }
     });
   }
@@ -42,11 +44,12 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-
+/*
 function validPassword(user, password, done){
   bcrypt.compare(password, user.password, function(err, result){
     done(err, result);
   });
 }
+*/
 
 exports = module.exports = passport;

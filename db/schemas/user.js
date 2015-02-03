@@ -18,6 +18,12 @@ userSchema.methods.toEmber = function(cb) {
   }
 }
 
+userSchema.methods.checkPassword = function(user, password, done){
+  bcrypt.compare(password, user.password, function(err, result){
+    done(err, result);
+  });
+}
+
 userSchema.statics.encryptPassword = function (password, cb) {
   bcrypt.genSalt(10, function(err, salt) {
     bcrypt.hash(password, salt, function(err, hash) {
