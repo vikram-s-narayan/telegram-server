@@ -8,7 +8,10 @@ var userSchema = new Schema({
   name: String,
   email: String,
   password: String,
-  posts: [{id: Number}]
+  posts: [{id: Number}],
+  following: [] // contains ids of users that instance user is following;
+  //we'll be using $addToSet, $pull in MongoDB;
+  //when we do the updates
 });
 
 userSchema.methods.toEmber = function(cb) {

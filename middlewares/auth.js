@@ -44,12 +44,5 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-/*
-function validPassword(user, password, done){
-  bcrypt.compare(password, user.password, function(err, result){
-    done(err, result);
-  });
-}
-*/
 
 exports = module.exports = passport;
