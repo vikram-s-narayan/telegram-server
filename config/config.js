@@ -1,5 +1,4 @@
 var fs    = require('fs');
-var nconf = require('nconf');
-var config = nconf.file(
-  { file: './home/ubuntu/telegram-server/config/config-dev.json' });
-module.exports = config;
+var config = require('nconf');
+
+exports = module.exports = config;
