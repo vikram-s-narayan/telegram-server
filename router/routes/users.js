@@ -6,13 +6,16 @@ var passport = require('../../middlewares/auth');
 var bcrypt = require('bcrypt');
 var generatePassword = require('password-generator');
 var md5 = require('MD5');
-var api_key = 'key-ca9dc9487107edeba3fbb0333f75782f';
-var domain = 'sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org';
-var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 var fs = require('fs');
 var path = require('path');//helps concatenate two paths
 var filePath = path.join(__dirname, '../../templates/forgotpassword'); //dirname - path to the local directory in node where the source file is;
 var Handlebars = require('handlebars');
+var config = require('../../config/config');
+//var api_key = config.get('mailgunKey');
+//var domain = config.get('emailDomain');
+var api_key = 'key-aabc296192a06b5e8e4cedf78b7b10ea';
+var domain = 'sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org';
+var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 
 router.post('/', function (req, res, next) { //=> this translates to /api/users/
   var operation = req.body.user.meta.operation;
@@ -63,7 +66,7 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
   });
   } else if (operation === 'passwordReset') {
     //super-nesting starts here
-    var email = req.body.user.email;
+    //var email = req.body.user.email;
     var newPassword = generateNewPassword();
     var md5Password = md5(newPassword);
 
@@ -93,9 +96,17 @@ router.post('/', function (req, res, next) { //=> this translates to /api/users/
                 subject: 'Password',
                 html: result
               };
+              console.log('emailData is: ', emailData);
               mailgun.messages().send(emailData, function (error, body) {
+                if (error) {
+                  console.log(error);
+                } else {
+                console.log('api key is: ', api_key);
+                console.log('domain is: ', domain);
+                console.log('and now the body ...');
                 console.log(body);
                 return res.send({users: []});
+                }
               });
             }
           });

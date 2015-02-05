@@ -1,4 +1,6 @@
 {
-  "serverPort" : "3000",
-  "mailgunKey"  : "key-ca9dc9487107edeba3fbb0333f75782f"
+  "serverPort"  : "3000",
+  "mailgunKey"  : "key-aabc296192a06b5e8e4cedf78b7b10ea",
+  "emailDomain" : "sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org",
+  "dbHost"      : "mongodb://localhost/telegram"
 }

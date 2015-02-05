@@ -2,8 +2,6 @@ var express = require('express');
 var logger = require('nlogger').logger(module);
 var app = express();
 var db = require('./db');
-var fs    = require('fs');
-var nconf = require('nconf');
 var config = require('./config/config');
 
 
@@ -12,15 +10,14 @@ require('./middlewares')(app);
 
 require('./router')(app);
 
-config.file(
-{ file: './home/ubuntu/telegram-server/config/config-dev.json' });
+
 console.log(config.get('serverPort'));
 console.log(config.get('mailgunKey'));
 
 db.once('open', function (callback) {
   console.log("db connected");
 
-  var server = app.listen(3000, function() {
+  var server = app.listen(config.get('serverPort'), function() {
   console.log('Listening on port %d', server.address().port);
  });
 });

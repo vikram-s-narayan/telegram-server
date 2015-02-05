@@ -1,4 +1,6 @@
 var fs    = require('fs');
-var config = require('nconf');
+var nconf = require('nconf')
+  , path = require('path');
+nconf.file({ file: path.join(__dirname, 'config-dev.json') });
 
-exports = module.exports = config;
+exports = module.exports = nconf;
