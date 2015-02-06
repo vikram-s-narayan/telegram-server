@@ -55,4 +55,7 @@ router.get('/:userid', function(req, res) {
   });
 });
 
+router.put({}); //implement here
+//test between /api/users and /api/users/:userid
+//implement on client and do save operation and look at network tab;
 exports = module.exports = router;

@@ -10,8 +10,9 @@ var path = require('path');//helps concatenate two paths
 var filePath = path.join(__dirname, '../../../templates/forgotpassword');
 var Handlebars = require('handlebars');
 var config = require('../../../config/config');
-var api_key = config.get('mailgunKey');
-var domain = config.get('emailDomain');
+var api_key = config.get('mailgun:key');//no space between mailgun and key
+var domain = config.get('mailgun:domain');
+var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 
 account.login = function (req, res) {
   //implement login function here;
@@ -120,4 +121,9 @@ account.isAuthenticated = function(req, res) {
     return res.send({users: []});
     }
   }
+}
+
+function generateNewPassword(){
+  var newPassword = generatePassword(12, false);
+  return newPassword;
 }
