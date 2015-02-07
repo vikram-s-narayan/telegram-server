@@ -14,11 +14,16 @@ var userSchema = new Schema({
   //when we do the updates
 });
 
-userSchema.methods.toEmber = function(cb) {
-  return {
-    id: this.id,
-    name: this.name
+userSchema.methods.toEmber = function(loggedInUser) {
+  var emberUser =  {
+  id: this.id,
+  name: this.name,
+  isFollowing: false
   }
+if (loggedInUser) {
+  emberUser.isFollowing = (loggedInUser.following||[]).indexOf(this.id)!==-1
+}
+  return emberUser;
 }
 
 userSchema.methods.checkPassword = function(user, password, done){

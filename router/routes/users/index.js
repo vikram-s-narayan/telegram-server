@@ -51,11 +51,35 @@ router.get('/:userid', function(req, res) {
     }
 
     console.log("returning in :userid ...", user.toEmber());
-    return res.send({user: user.toEmber()});//8
+    return res.send({user: user.toEmber(req.user)});//8
+  });
+});
+/*
+router.put('/:userid', function(req, res){
+  var userToFollow = req.body.user.following;
+  console.log("printing userToFollow");
+  console.log(userToFollow);
+  //var userId = req.body.user.id;
+  var userId = req.params.userid;
+  console.log("User's ID: ", userId);
+});
+
+*/
+
+router.put('/:userid', function(req, res){
+  var userToFollow = req.body.user.meta.following;
+  var userId = req.params.userid;
+  var query = {"id": userId};
+  var update = { $addToSet: { following: userToFollow } };
+
+  User.findOneAndUpdate(query, update, function(err, user){
+    if(err) {
+      console.log(err);
+    } else {
+      console.log(user);
+      res.status(200).send({user: user.toEmber()});
+    }
   });
 });
 
-router.put({}); //implement here
-//test between /api/users and /api/users/:userid
-//implement on client and do save operation and look at network tab;
 exports = module.exports = router;
