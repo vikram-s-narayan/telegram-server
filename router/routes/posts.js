@@ -10,7 +10,20 @@ router.get('/', function(req, res) {
   });
 });
 
-//Post.find({ id:333 }).remove().exec();
+
+router.delete('/:postid', function(req, res){
+  console.log('delete request received for ...', req.params.postid);
+  var query = { _id: req.params.postid}
+  Post.findOneAndRemove(query, function(err, docs){
+    if(err){
+      console.log(err);
+    } else {
+      console.log('about to send in docs ...')
+      res.send({ posts: docs })
+    }
+  });
+});
+
 
 router.post('/', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
