@@ -18,10 +18,10 @@ userSchema.methods.toEmber = function(loggedInUser) {
   var emberUser =  {
   id: this.id,
   name: this.name,
-  isFollowing: false
+  isFollowed: false
   }
 if (loggedInUser) {
-  emberUser.isFollowing = (loggedInUser.following||[]).indexOf(this.id)!==-1
+  emberUser.isFollowed = (loggedInUser.following||[]).indexOf(this.id)!==-1
 }
   return emberUser;
 }
