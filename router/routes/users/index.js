@@ -40,6 +40,7 @@ router.get('/', function(req, res, next) {
 
 
 router.get('/:userid', function(req, res) {
+  //var operation = req.body.user.meta.operation;
   var id = req.params.userid;
   User.findOne({id: id}, function(err, user){
     if (err) {
@@ -67,6 +68,8 @@ router.put('/:userid', function(req, res){
 */
 
 router.put('/:userid', function(req, res){
+  var operation = req.body.user.meta.operation;
+  if(operation==='follow') {
   var userToFollow = req.body.user.meta.following;
   var userId = req.params.userid;
   var query = {"id": userId};
@@ -80,6 +83,21 @@ router.put('/:userid', function(req, res){
       res.status(200).send({user: user.toEmber()});
     }
   });
+}  else if (operation === 'unfollow') {
+  var userToUnfollow = req.body.user.meta.unfollowing
+  var userId = req.params.userid;
+  var query = {"id": userId};
+  var update = {$pull: { following: userToUnfollow } };
+
+  User.findOneAndUpdate(query, update, function(err, user){
+    if(err) {
+      console.log(err);
+    } else {
+      console.log(user);
+      res.status(200).send({user: user.toEmber()});
+    }
+  });
+ }
 });
 
 exports = module.exports = router;
