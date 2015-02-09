@@ -51,7 +51,7 @@ router.get('/:userid', function(req, res) {
       return res.sendStatus(404);
     }
 
-    console.log("returning in :userid ...", user.toEmber());
+
     return res.send({user: user.toEmber(req.user)});//8
   });
 });

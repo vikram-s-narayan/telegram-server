@@ -1,14 +1,33 @@
 var express = require('express');
 var db = require('../../db');
 var Post = db.model('Post');
+var User = db.model('User');
 var router = express.Router();
 var ensureAuthenticated = require('../../middlewares/ensureAuthenticated');
 
 router.get('/', function(req, res) {
   Post.find({}, function (err, docs) {
-    return res.send({posts: docs});
+    var usersArray = [];
+
+    docs.forEach(function(entry) {
+      if(usersArray.indexOf(entry.postCreator)===-1){
+        usersArray.push(entry.postCreator);
+      }
+    });
+
+    User.find({'id': { $in: usersArray }}, function(err, docs_inside){
+      var docs_users = docs_inside.map(function(user){
+        return user.toEmber();
+      });
+
+      console.log("This is users",docs_users);
+      return res.send({posts: docs,
+                      users: docs_users
+      });
+    });
   });
 });
+
 
 
 router.delete('/:postid', function(req, res){

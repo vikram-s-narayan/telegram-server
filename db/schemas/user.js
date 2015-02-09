@@ -9,9 +9,7 @@ var userSchema = new Schema({
   email: String,
   password: String,
   posts: [{id: Number}],
-  following: [] // contains ids of users that instance user is following;
-  //we'll be using $addToSet, $pull in MongoDB;
-  //when we do the updates
+  following: [] 
 });
 
 userSchema.methods.toEmber = function(loggedInUser) {
