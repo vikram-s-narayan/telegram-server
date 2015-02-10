@@ -70,17 +70,22 @@ router.put('/:userid', function(req, res){
 router.put('/:userid', function(req, res){
   var operation = req.body.user.meta.operation;
   if(operation==='follow') {
+  console.log("follow request received");
   var userToFollow = req.body.user.meta.following;
+
   var userId = req.params.userid;
   var query = {"id": userId};
   var update = { $addToSet: { following: userToFollow } };
+  console.log("user logged in is: ", userId);
+  console.log("user to follow is: ", userToFollow);
 
   User.findOneAndUpdate(query, update, function(err, user){
     if(err) {
       console.log(err);
     } else {
-      console.log(user);
-      res.status(200).send({user: user.toEmber()});
+      console.log([user.toEmber(userId)]);//issue to be fixed
+      res.status(200).send({user: [user.toEmber(userId)]});
+      //res.status(500).send({message: 'something burning!'});
     }
   });
 }  else if (operation === 'unfollow') {

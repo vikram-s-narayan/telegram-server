@@ -9,7 +9,7 @@ var userSchema = new Schema({
   email: String,
   password: String,
   posts: [{id: Number}],
-  following: [] 
+  following: []
 });
 
 userSchema.methods.toEmber = function(loggedInUser) {
