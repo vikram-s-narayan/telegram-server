@@ -115,7 +115,7 @@ account.passwordReset = function(req, res) {
 account.isAuthenticated = function(req, res) {
 {
   if (req.isAuthenticated()) {
-    console.log("now returning authenticated user ...", req.user.toEmber())
+    console.log("now returning authenticated user ...", req.user.toEmber());
     return res.send({users: [req.user.toEmber()]});
   } else {
     return res.send({users: []});

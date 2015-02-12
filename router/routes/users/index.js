@@ -6,6 +6,7 @@ var router = express.Router();
 var db = require('../../../db');
 var User = db.model('User');
 
+
 router.post('/', function (req, res, next) {
   var operation = req.body.user.meta.operation;
 
@@ -24,14 +25,15 @@ router.post('/', function (req, res, next) {
 
 router.get('/', function(req, res, next) {
   var operation = req.query.operation;
+  var currentUser = req.query.currentUser;
 
  switch (operation) {
    case 'isAuthenticated':
      return account.isAuthenticated(req, res);
    case 'getFollowers':
-     return graph.getFollowers(req, res);
+     return graph.getFollowers(req, res, currentUser);
    case 'getFollowing':
-     return graph.getFollowing(req, res);
+     return graph.getFollowing(req, res, currentUser);
    default:
        logger.error('unknown operation');
        return res.sendStatus(400); //bad request
