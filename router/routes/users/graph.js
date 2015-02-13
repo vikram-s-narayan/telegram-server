@@ -8,7 +8,7 @@ graph.getFollowers = function(req, res, currentUser) {
   User.findOne({'id': currentUser}, function(err, userObject){
     if(err){console.log(err);}
     console.log('this is userObject from followers: ', userObject);
-    User.find({}, function (err, docs) {
+    User.find({following: currentUser}, function (err, docs) {//User.find({following: currentUser}
       var emberUsersArray = docs.map(function(user){
       if (req.isAuthenticated()) {
         return user.toEmber(req.user)
@@ -26,8 +26,10 @@ graph.getFollowing = function(req, res, currentUser) {
   console.log("this is currentUser in following: ", currentUser);
   User.findOne({'id': currentUser}, function(err, userObject){
     if(err){console.log(err);}
-    console.log('this is userObject from following: ', userObject);
-    User.find({}, function (err, docs) {
+    console.log('this is userObject(currentUser) from following: ', userObject);
+    var followingArray = userObject.following;
+    console.log('these are the people that this user is following', followingArray);
+    User.find({'id': { $in: followingArray }}, function (err, docs) {
       var emberUsersArray = docs.map(function(user){
         if (req.isAuthenticated()) {
           return user.toEmber(req.user)
