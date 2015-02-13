@@ -14,6 +14,8 @@ require('./router')(app);
 console.log(config.get('serverPort'));
 console.log(config.get('mailgun:key'));
 
+
+
 db.once('open', function (callback) {
   console.log("db connected");
 

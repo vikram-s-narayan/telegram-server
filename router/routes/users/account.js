@@ -42,7 +42,8 @@ account.signup = function(req, res) {
       id: newUser.id,
       name: newUser.name,
       email: newUser.email,
-      password: hash
+      password: hash,
+      imgUrl: generateImgUrl()
     });
     userToDb.save(function(err, userToDb) {
       if(err) return console.error(err);
@@ -126,4 +127,22 @@ account.isAuthenticated = function(req, res) {
 function generateNewPassword(){
   var newPassword = generatePassword(12, false);
   return newPassword;
+}
+
+function generateImgUrl(){
+  var randomInt = getRandomInt(1,5);
+  switch (randomInt) {
+  case 1:
+  return "/images/avatar-blue.png";
+  case 2:
+  return "/images/avatar-orange.png";
+  case 3:
+  return "/images/avatar-red.png"
+  default:
+  return "/images/avatar-green.png"
+  }
+}
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
 }

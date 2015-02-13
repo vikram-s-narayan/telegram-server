@@ -9,14 +9,16 @@ var userSchema = new Schema({
   email: String,
   password: String,
   posts: [{id: Number}],
-  following: []
+  following: [],
+  imgUrl: String
 });
 
 userSchema.methods.toEmber = function(loggedInUser) {
   var emberUser =  {
   id: this.id,
   name: this.name,
-  isFollowed: false
+  isFollowed: false,
+  imgUrl: this.imgUrl
   }
 if (loggedInUser) {
   emberUser.isFollowed = (loggedInUser.following||[]).indexOf(this.id)!==-1
