@@ -6,8 +6,7 @@ function ensureAuthenticated(req, res, next) {
     return next();
   } else {
     console.log("forbidden action");
-    //res.status(403).jsonp( {error: 'Forbidden action!'} );
-    res.sendStatus(403);//<=this is a better way to do it ... unless you need customization;
+    res.sendStatus(403);
   }
 }
 

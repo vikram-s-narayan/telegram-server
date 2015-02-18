@@ -2,6 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var postSchema = new Schema({
   id: Number,
+  /*
+  postCreator: {
+    type: Schema.ObjectId,
+    ref: 'User'},*/
   postCreator: String,
   postContent: String,
   createdAt: Date

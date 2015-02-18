@@ -34,13 +34,13 @@ passport.use(new LocalStrategy(
 ));
 
 
-passport.serializeUser(function(user, done) { //passport calls this behind the scenes;
+passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
 
 passport.deserializeUser(function(id, done) {
   User.findOne({id: id}, function(err, user) {
-    done(err, user);//if no user exists, it will return null and null;
+    done(err, user);
   });
 });
 

@@ -42,7 +42,6 @@ router.get('/', function(req, res, next) {
 
 
 router.get('/:userid', function(req, res) {
-  //var operation = req.body.user.meta.operation;
   var id = req.params.userid;
   User.findOne({id: id}, function(err, user){
     if (err) {
@@ -54,20 +53,10 @@ router.get('/:userid', function(req, res) {
     }
 
 
-    return res.send({user: user.toEmber(req.user)});//8
+    return res.send({user: user.toEmber(req.user)});
   });
 });
-/*
-router.put('/:userid', function(req, res){
-  var userToFollow = req.body.user.following;
-  console.log("printing userToFollow");
-  console.log(userToFollow);
-  //var userId = req.body.user.id;
-  var userId = req.params.userid;
-  console.log("User's ID: ", userId);
-});
 
-*/
 
 router.put('/:userid', function(req, res){
   var operation = req.body.user.meta.operation;
@@ -84,9 +73,10 @@ router.put('/:userid', function(req, res){
   User.findOneAndUpdate(query, update, function(err, user){
     if(err) {
       console.log(err);
+      return res.sendStatus(500);
     } else {
-      console.log([user.toEmber(userId)]);//issue to be fixed
-      res.status(200).send({user: [user.toEmber(userId)]});
+      console.log([user.toEmber(userId)]);
+      return res.status(200).send({user: [user.toEmber(userId)]});
       //res.status(500).send({message: 'something burning!'});
     }
   });
@@ -99,9 +89,10 @@ router.put('/:userid', function(req, res){
   User.findOneAndUpdate(query, update, function(err, user){
     if(err) {
       console.log(err);
+      return res.sendStatus(500);
     } else {
       console.log(user);
-      res.status(200).send({user: user.toEmber()});
+      return res.status(200).send({user: user.toEmber()});
     }
   });
  }

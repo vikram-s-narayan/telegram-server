@@ -32,6 +32,21 @@ router.get('/', ensureAuthenticated, function(req, res) {
   });
 });
 
+/*
+router.get('/', function(req, res) {
+  console.log('about to call .populate ...')
+  Post.find().populate('postCreator').exec(function(err, posts) {
+  // now for each post object the postCreator field will be the actual user not only an ID
+  if (err){
+    console.log('POST LISTING FAILED: ', err);
+    res.sendStatus(500);
+  } else {
+    console.log('these are the posts',posts);
+    res.send({posts: posts});
+    }
+  });
+});
+*/
 
 
 router.delete('/:postid', function(req, res){
@@ -40,9 +55,10 @@ router.delete('/:postid', function(req, res){
   Post.findOneAndRemove(query, function(err, docs){
     if(err){
       console.log(err);
+      return res.sendStatus(500);
     } else {
       console.log('about to send in docs ...')
-      res.send({ posts: docs })
+      return res.send({ posts: docs })
     }
   });
 });
