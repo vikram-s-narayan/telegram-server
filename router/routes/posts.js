@@ -35,13 +35,23 @@ router.get('/', ensureAuthenticated, function(req, res) {
 /*
 router.get('/', function(req, res) {
   console.log('about to call .populate ...')
-  Post.find().populate('postCreator').exec(function(err, posts) {
+  Post.find().populate('postCreatorId').exec(function(err, posts) {
   // now for each post object the postCreator field will be the actual user not only an ID
   if (err){
     console.log('POST LISTING FAILED: ', err);
     res.sendStatus(500);
   } else {
-    console.log('these are the posts',posts);
+    var users = posts.map(function(postCreatorId){
+      console.log('POSTCREATORID: ', postCreatorId);
+      console.log(postCreatorId.postCreatorId);
+      if(postCreatorId.postCreatorId!==null){
+        //console.log('**************', postCreatorId.postCreatorId.toEmber(postCreatorId.postCreatorId));
+        return postCreatorId.postCreatorId.toEmber(postCreatorId.postCreatorId);
+      } else {
+        return 'poi poi';
+      }
+      });
+    console.log('these are users ', users);
     res.send({posts: posts});
     }
   });

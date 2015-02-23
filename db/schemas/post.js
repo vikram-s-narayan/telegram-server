@@ -2,8 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var postSchema = new Schema({
   id: Number,
-  /*
-  postCreator: {
+  /*postCreatorId: {
     type: Schema.ObjectId,
     ref: 'User'},*/
   postCreator: String,

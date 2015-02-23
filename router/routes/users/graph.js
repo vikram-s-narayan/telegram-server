@@ -14,7 +14,7 @@ graph.getFollowers = function(req, res, currentUser) {
     User.find({following: currentUser}, function (err, docs) {//User.find({following: currentUser}
       var emberUsersArray = docs.map(function(user){
       if (req.isAuthenticated()) {
-        return user.toEmber(req.user)
+        return user.toEmber(req.user);
       } else {
         return user.toEmber();
         }
