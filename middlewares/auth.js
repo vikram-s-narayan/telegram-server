@@ -3,6 +3,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var db = require('../db');
 var User = db.model('User');
 var bcrypt = require('bcrypt');
+var log = require('../log');
 
 passport.use(new LocalStrategy(
   {
@@ -10,22 +11,24 @@ passport.use(new LocalStrategy(
     , passwordField: 'user[meta][password]'
   },
   function(username, password, done){
-    User.findOne({'id': username}, function(err, user) {
-      if (err) {
-        return done(err);
+    User.findOne({'id': username}, function(error, user) {
+      if (error) {
+        log.info(err);
+        return done(error);
       } else if (!user) {
-        return done(null, false, {message: 'Incorrect username.'});
+        log.info('no user');
+        return done(null, false, { message: 'Incorrect username.' });
       } else {
-        user.checkPassword(user, password, function(err, result){
-          if (err) {
-            console.log('error in checkPassword');
+        user.checkPassword(user, password, function(error, result){
+          if (error) {
+            log.info(err);
             return done(err);
           } else if (result) {
-            console.log('Everything ok');
-            return done(null, user, {message: 'Everything ok'});
+            log.info('Everything ok for: ', user.id);
+            return done(null, user, { message: 'Everything ok' });
           } else {
-            console.log('incorrect password');
-            return done(null, false, {message: 'Incorrect password'})
+            log.info('incorrect password');
+            return done(null, false, { message: 'Incorrect password' });
           }
           });
       }

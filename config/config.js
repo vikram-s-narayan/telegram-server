@@ -1,17 +1,17 @@
 var fs    = require('fs');
-var logger = require('nlogger').logger(module);
+var log = require('../log');
 var nconf = require('nconf')
   , path = require('path');
-nconf.env();//loads all variables from unix system and makes available;
+nconf.env();
 if(nconf.get('NODE_ENV')==='development'){
   nconf.file({ file: path.join(__dirname, 'config-dev.json') });
-  console.log('using config-dev.json');
+  log.info('using config-dev.json');
 } else if(nconf.get('NODE_ENV')==='production'){
   nconf.file({ file: path.join(__dirname, 'config-prod.json') });
-  console.log('using config-prod.json');
+  log.info('using config-prod.json');
 } else {
-  logger.error('set NODE_ENV');
-  process.exit(1);//global object ... calls exit on process object;
+  logger.info('set NODE_ENV');
+  process.exit(1);
 }
 
 exports = module.exports = nconf;

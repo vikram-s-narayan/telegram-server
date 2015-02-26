@@ -1,11 +1,12 @@
+var log = require('../log');
 
 function ensureAuthenticated(req, res, next) {
-  console.log("middleware ensureAuthenticated called")
+  log.info("middleware ensureAuthenticated called")
   if (req.isAuthenticated()) {
     console.log("user is allowed to do this action")
     return next();
   } else {
-    console.log("forbidden action");
+    log.info("forbidden action tried");
     res.sendStatus(403);
   }
 }

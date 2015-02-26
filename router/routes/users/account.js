@@ -8,31 +8,34 @@ var fs = require('fs');
 var path = require('path');//helps concatenate two paths
 var filePath = path.join(__dirname, '../../../templates/forgotpassword');
 var Handlebars = require('handlebars');
-var config = require('../../../config/config');
-var api_key = config.get('mailgun:key');//no space between mailgun and key
-var domain = config.get('mailgun:domain');
-var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 var emails = require('../../emails');
+var log = require('../../../log');
 
 account.login = function (req, res) {
-  passport.authenticate('local', function(err, user, info){
-    console.log("passport.authenticate called");
-    if (err) { return res.sendStatus(500); }
-    if (!user) { return res.status(403).send(info.message); } //If we don't have any user send the string message stored in the info variable.
-      req.login(user, function(err) {
-        if (err) {
+  passport.authenticate('local', function(error, user, info){
+    log.info("passport.authenticate called for: ", user);
+    if (error) {
+      log.info(err);
+      return res.sendStatus(500); }
+    if (!user) {
+      log.info('no user');
+      return res.status(403).send(info.message); } //If we don't have any user send the string message stored in the info variable.
+      req.login(user, function(error) {
+        if (error) {
+          log.info(err);
           return res.sendStatus(500); }
-          console.log("now returning user info after auth");
-          console.log("now returning user.toEmber ...", user.toEmber());
+          log.info("user.toEmber ...", user.toEmber());
           return res.send({users: [user.toEmber()]});
         });
       })(req, res);
 }
 
 account.signup = function(req, res) {
-  if (!req.body) return res.sendStatus(400);
+  if (!req.body) {
+    log.info('someone tried to submit empty form');
+    return res.sendStatus(400); }
   var newUser = req.body.user;
-  console.log(newUser);
+  log.info(newUser);
   console.log(newUser.meta.password);
   User.encryptPassword(newUser.meta.password, function(err, hash) {
     if (err) { return res.sendStatus(500); }
@@ -44,20 +47,20 @@ account.signup = function(req, res) {
       password: hash,
       imgUrl: generateImgUrl()
     });
-    userToDb.save(function(err, userToDb) {
-      if(err) {
-        console.error(err);
+    userToDb.save(function(error, userToDb) {
+      if(error) {
+        log.info(err);
         return res.sendStatus(500);
       }
-      console.log('user info saved');
-      console.dir(userToDb);
-      req.login(userToDb, function(err) {
-        if (err) {
+      log.info('user info saved for: ', newUser.id);
+      req.login(userToDb, function(error) {
+        if (error) {
+          log.info(err);
           return res.sendStatus(500);
         } else {
-          console.log("now returning user info after auth");
-          console.log("userToDb.toEmber is ...", userToDb.toEmber());
-          return res.send({user: userToDb.toEmber()});
+          var toEmberUser = userToDb.toEmber()
+          log.info('logging in after signup of user: ', toEmberUser);
+          return res.send({ user: toEmberUser });
         }
       });
     });
@@ -70,28 +73,27 @@ account.passwordReset = function(req, res) {
   var newPassword = generateNewPassword();
   var md5Password = md5(newPassword);
 
-  User.encryptPassword(md5Password, function(err, hash) {
-    if(err) {console.log(err);}
-    var query = {"email": email};
-    var update = {password: hash};
-    var options = {new: true};
-    User.findOneAndUpdate(query, update, options, function(err, user){
-      if(err) {
-        console.log(err);
+  User.encryptPassword(md5Password, function(error, hash) {
+    if(error) { log.info(err); }
+    var query = { "email": email };
+    var update = { password: hash };
+    var options = { new: true };
+    User.findOneAndUpdate(query, update, options, function(error, user){
+      if(error) {
+        log.info(err);
         return res.sendStatus(500);
       } else if (user===null) {
-        console.log("user NOT in system and email is", email);
-        res.status(404).send({message: "user not in system"});
+        log.info("user NOT in system for email: ", email);
+        res.status(404).send({ message: "user not in system" });
       } else {
         emails.sendPasswordResetEmail(user, newPassword, function(msg){
           if (msg === 'success') {
             return res.send({users: []});
           } else {
-            console.log(msg);
+            log.info(msg);
             return res.sendStatus(500);
           }
         });
-
       }
     });
   });
@@ -100,7 +102,7 @@ account.passwordReset = function(req, res) {
 account.isAuthenticated = function(req, res) {
 {
   if (req.isAuthenticated()) {
-    console.log("now returning authenticated user ...", req.user.toEmber());
+    log.info("returning authenticated user: ", req.user.toEmber());
     return res.send({users: [req.user.toEmber()]});
   } else {
     return res.send({users: []});

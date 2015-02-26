@@ -1,11 +1,10 @@
-//get express, router, passport etc.
 var account = require('./account');
 var graph = require('./graph');
 var express = require('express');
 var router = express.Router();
 var db = require('../../../db');
 var User = db.model('User');
-
+var log = require('../../../log');
 
 router.post('/', function (req, res, next) {
   var operation = req.body.user.meta.operation;
@@ -18,8 +17,8 @@ router.post('/', function (req, res, next) {
     case 'passwordReset':
       return account.passwordReset(req, res);
     default:
-      logger.error('unknown operation');
-      return res.sendStatus(400); //bad request
+      logger.info('unknown operation');
+      return res.sendStatus(400);
   }
 });
 
@@ -35,7 +34,7 @@ router.get('/', function(req, res, next) {
    case 'getFollowing':
      return graph.getFollowing(req, res, currentUser);
    default:
-       logger.error('unknown operation');
+       log.info('unknown operation');
        return res.sendStatus(400); //bad request
  }
 });
@@ -43,16 +42,16 @@ router.get('/', function(req, res, next) {
 
 router.get('/:userid', function(req, res) {
   var id = req.params.userid;
-  User.findOne({id: id}, function(err, user){
-    if (err) {
+  User.findOne({id: id}, function(error, user){
+    if (error) {
+      log.info(err);
       return res.sendStatus(500);
     }
 
     if (!user){
+      log.info('no user called: ', id)
       return res.sendStatus(404);
     }
-
-
     return res.send({user: user.toEmber(req.user)});
   });
 });
@@ -61,23 +60,21 @@ router.get('/:userid', function(req, res) {
 router.put('/:userid', function(req, res){
   var operation = req.body.user.meta.operation;
   if(operation==='follow') {
-  console.log("follow request received");
+  log.info('follow request received');
   var userToFollow = req.body.user.meta.following;
-
   var userId = req.params.userid;
   var query = {"id": userId};
   var update = { $addToSet: { following: userToFollow } };
-  console.log("user logged in is: ", userId);
-  console.log("user to follow is: ", userToFollow);
+  log.info("user logged in is: ", userId);
+  log.info("user to follow is: ", userToFollow);
 
-  User.findOneAndUpdate(query, update, function(err, user){
-    if(err) {
-      console.log(err);
+  User.findOneAndUpdate(query, update, function(error, user){
+    if(error) {
+      log.info(err);
       return res.sendStatus(500);
     } else {
-      console.log([user.toEmber(userId)]);
+      log.info([user.toEmber(userId)]);
       return res.status(200).send({user: [user.toEmber(userId)]});
-      //res.status(500).send({message: 'something burning!'});
     }
   });
 }  else if (operation === 'unfollow') {
@@ -86,12 +83,12 @@ router.put('/:userid', function(req, res){
   var query = {"id": userId};
   var update = {$pull: { following: userToUnfollow } };
 
-  User.findOneAndUpdate(query, update, function(err, user){
-    if(err) {
-      console.log(err);
+  User.findOneAndUpdate(query, update, function(error, user){
+    if(error) {
+      log.info(err);
       return res.sendStatus(500);
     } else {
-      console.log(user);
+      log.info(user);
       return res.status(200).send({user: user.toEmber()});
     }
   });
