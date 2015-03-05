@@ -11,6 +11,7 @@ require('./router')(app);
 db.once('open', function (callback) {
   var server = app.listen(config.get('serverPort'), function() {
   log.info('Listening on port %d', server.address().port);
+  log.info('DB is', config.get('dbHost'));
  });
 });
 

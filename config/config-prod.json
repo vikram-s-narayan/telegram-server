@@ -3,5 +3,5 @@
   "mailgun": {"key"  : "key-aabc296192a06b5e8e4cedf78b7b10ea",
     "domain" : "sandbox712cd50d71f84521ad15a187106d1f1d.mailgun.org"
   },
-  "dbHost"      : "mongodb://localhost/telegram7"
+  "dbHost"      : "mongodb://localhost/telegram15"
 }

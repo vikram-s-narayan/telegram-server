@@ -6,56 +6,26 @@ var router = express.Router();
 var ensureAuthenticated = require('../../middlewares/ensureAuthenticated');
 var log = require('../../log');
 
-router.get('/', ensureAuthenticated, function(req, res) {
-  Post.find({}, function (err, docs) {
-    var usersArray = [];
-    var loggedInUser = req.user.id;
-    log.info("Getting posts for user: ", loggedInUser);
-    docs.forEach(function(entry) {
-      if(usersArray.indexOf(entry.postCreator)===-1){
-        usersArray.push(entry.postCreator);
-      }
-    });
-  User.findOne({'id': loggedInUser}, function(error, loggedInUserObject){
-    if(error){log.info(err);}
-    User.find({'id': { $in: usersArray }}, function(err, userObjects){
-      var docs_users = userObjects.map(function(user){
-            return user.toEmber(loggedInUserObject);
-      });
-
-      return res.send({posts: docs,
-                      users: docs_users
-        });
-      });
-    });
-  });
-});
-
-/*
 router.get('/', function(req, res) {
-  console.log('about to call .populate ...')
-  Post.find().populate('postCreatorId').exec(function(err, posts) {
-  // now for each post object the postCreator field will be the actual user not only an ID
-  if (err){
-    console.log('POST LISTING FAILED: ', err);
-    res.sendStatus(500);
-  } else {
-    var users = posts.map(function(postCreatorId){
-      console.log('POSTCREATORID: ', postCreatorId);
-      console.log(postCreatorId.postCreatorId);
-      if(postCreatorId.postCreatorId!==null){
-        //console.log('**************', postCreatorId.postCreatorId.toEmber(postCreatorId.postCreatorId));
-        return postCreatorId.postCreatorId.toEmber(postCreatorId.postCreatorId);
-      } else {
-        return 'poi poi';
-      }
-      });
-    console.log('these are users ', users);
-    res.send({posts: posts});
+  log.info('entering mystream route');
+  Post.find({}).populate('postCreatorId').exec(function(err, posts) {
+    if (err){
+      log.info(err)
+      return res.sendStatus(500);
     }
+
+    log.info("POSTS: ", posts);
+
+    var users = posts.map(function(post) {
+      return post.postCreatorId.toEmber(req.user);
+      // post.postCreatorId is now user object so you must call toEmber() on it.
+    })
+
+    log.info("USERS: ", users);
+    return res.send({posts: posts, users: users})
+    // sending the users as well - sideloading
   });
 });
-*/
 
 
 router.delete('/:postid', function(req, res){
@@ -77,6 +47,7 @@ router.post('/', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
   if (req.user.id===newPost.postCreator) {
     var postToDb = new Post({
+      postCreatorId: req.user._id,//need to check this
       postCreator: newPost.postCreator,
       postContent: newPost.postContent,
       createdAt: new Date()
