@@ -20,12 +20,13 @@ account.login = function (req, res) {
     if (!user) {
       log.info('no user');
       return res.status(403).send(info.message); } //If we don't have any user send the string message stored in the info variable.
-      req.login(user, function(error) {
-        if (error) {
-          log.info(err);
-          return res.sendStatus(500); }
-            log.info("user.toEmber ...", user.toEmber());
-            return res.send({users: [user.toEmber()]});
+
+    req.login(user, function(error) {
+      if (error) {
+        log.info(err);
+        return res.sendStatus(500); }
+        log.info("user.toEmber ...", user.toEmber());
+        return res.send({users: [user.toEmber()]});
         });
       })(req, res);
     }
