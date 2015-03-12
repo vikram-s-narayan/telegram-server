@@ -73,8 +73,7 @@ router.put('/:userid', function(req, res){
       log.info(err);
       return res.sendStatus(500);
     } else {
-      log.info([user.toEmber(userId)]);
-      return res.status(200).send({user: [user.toEmber(userId)]});
+      return res.status(200).send({user: [user.toEmber(user)]});
     }
   });
 }  else if (operation === 'unfollow') {

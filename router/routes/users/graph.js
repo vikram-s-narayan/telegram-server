@@ -6,7 +6,7 @@ var log = require('../../../log');
 
 graph.getFollowers = function(req, res, profileUserId) {
   console.log("this is profileUserId in followers: ", profileUserId);
-  User.findOne({'id': profileUserId}, function(err, userObject){
+  User.findOne({id: profileUserId}, function(err, userObject){
     if(err){
       log.info(err);
       return res.sendStatus(500);
@@ -26,7 +26,7 @@ graph.getFollowers = function(req, res, profileUserId) {
 
 graph.getFollowing = function(req, res, profileUserId) {
   log.info("this is profileUserId in following: ", profileUserId);
-  User.findOne({'id': profileUserId}, function(error, userObject){
+  User.findOne({id: profileUserId}, function(error, userObject){
     if(error){
       log.info(err);
       return res.sendStatus(500);

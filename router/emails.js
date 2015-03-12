@@ -31,7 +31,7 @@ exports.sendPasswordResetEmail = function(user, plainTextPassword, done) {
           log.info(err);
           return done(error);
         } else {
-          return done('success');
+          return done(null);
         }
       });
     }

@@ -47,7 +47,7 @@ router.post('/', ensureAuthenticated, function (req, res){
   var newPost = req.body.post;
   if (req.user.id===newPost.postCreator) {
     var postToDb = new Post({
-      postCreatorId: req.user._id,//need to check this
+      postCreatorId: req.user._id,//added this to facilitate Mongoose populate
       postCreator: newPost.postCreator,
       postContent: newPost.postContent,
       createdAt: new Date()
@@ -65,7 +65,7 @@ router.post('/', ensureAuthenticated, function (req, res){
 
   } else {
     log.info("cannot make this post");
-    return res.status(403);
+    return res.sendStatus(403);
     res.end();
   }
 });

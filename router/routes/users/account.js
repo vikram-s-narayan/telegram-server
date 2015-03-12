@@ -24,11 +24,11 @@ account.login = function (req, res) {
         if (error) {
           log.info(err);
           return res.sendStatus(500); }
-          log.info("user.toEmber ...", user.toEmber());
-          return res.send({users: [user.toEmber()]});
+            log.info("user.toEmber ...", user.toEmber());
+            return res.send({users: [user.toEmber()]});
         });
       })(req, res);
-}
+    }
 
 account.signup = function(req, res) {
   if (!req.body) {
@@ -87,7 +87,7 @@ account.passwordReset = function(req, res) {
         res.status(404).send({ message: "user not in system" });
       } else {
         emails.sendPasswordResetEmail(user, newPassword, function(msg){
-          if (msg === 'success') {
+          if (msg === null) {
             return res.send({users: []});
           } else {
             log.info(msg);

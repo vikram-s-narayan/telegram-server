@@ -20,6 +20,8 @@ userSchema.methods.toEmber = function(loggedInUser) {
   imgUrl: this.imgUrl
   }
 if (loggedInUser) {
+  console.log('this is logged in user!', loggedInUser);//remove
+  console.log('this is logged in user.following', loggedInUser.following);//remove
   emberUser.isFollowed = (loggedInUser.following||[]).indexOf(this.id)!==-1
 }
   return emberUser;
